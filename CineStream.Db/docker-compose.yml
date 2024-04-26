@@ -1,0 +1,30 @@
+version: "3.8"
+
+services:
+  mssql:
+    image: mcr.microsoft.com/azure-sql-edge:latest
+    platform: linux/amd64
+    container_name: mssql
+    ports:
+      - "1433:1433"
+    environment:
+      SA_PASSWORD: "YourStrong!Passw0rd"
+      ACCEPT_EULA: "Y"
+    volumes:
+      - sqlserver_data:/var/opt/mssql
+
+  sqlcmd:
+    image: mcr.microsoft.com/mssql-tools:latest
+    platform: linux/amd64
+    container_name: sqlcmd
+    stdin_open: true
+    depends_on:
+      - mssql
+    environment:
+      SA_PASSWORD: "YourStrong!Passw0rd"
+    volumes:
+      - ./init-db.sql:/opt/mssql/init/init-db.sql
+    command: /bin/bash -c 'sleep 30 && /opt/mssql-tools/bin/sqlcmd -S mssql -U sa -P $$SA_PASSWORD -i /opt/mssql/init/init-db.sql; wait;'
+
+volumes:
+  sqlserver_data:

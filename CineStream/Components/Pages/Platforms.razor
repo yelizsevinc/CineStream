@@ -1,0 +1,42 @@
+﻿@page "/platforms"
+@using Microsoft.EntityFrameworkCore
+@using CineStream.Data
+
+@inject IDbContextFactory<CineStreamContext> DbFactory
+
+<PageTitle>Platforms</PageTitle>
+
+<Tabs>
+    <Tab>
+        <Header>Platforms</Header>
+        <ChildContent>
+            @if (StreamPlatforms != null)
+            {
+                <Datagrid Items="StreamPlatforms">
+                    <DatagridColumn Title="PlatformId" TRowData="Platform" Field="c => c.PlatformId" CanSort="true"
+                        CanFilter="true" FilterImmediately="true" />
+                    <DatagridColumn Title="Name" TRowData="Platform" Field="c => c.Name" CanSort="true" CanFilter="true"
+                        FilterImmediately="true" />
+
+                </Datagrid>
+            }
+        </ChildContent>
+    </Tab>
+</Tabs>
+
+@code {
+    private ICollection<Platform>? StreamPlatforms { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadDataAsync();
+    }
+
+    private async Task LoadDataAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+
+        StreamPlatforms = await context.Platforms!.ToListAsync();
+
+    }
+}
