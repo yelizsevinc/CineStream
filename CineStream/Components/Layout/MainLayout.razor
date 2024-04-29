@@ -1,23 +1,52 @@
 ﻿@inherits LayoutComponentBase
 
+@inject NavigationManager NavManager
+
 <div class="page">
     <div class="sidebar">
         <NavMenu />
     </div>
-
     <main>
         <div class="top-row px-4">
-            <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
+            <a href="#">Logout</a>
         </div>
-
         <article class="content px-4">
+            <Breadcrumb Crumbs="Crumbs" />
             @Body
         </article>
     </main>
 </div>
-
-<div id="blazor-error-ui" data-nosnippet>
+<div id="blazor-error-ui">
     An unhandled error has occurred.
-    <a href="." class="reload">Reload</a>
-    <span class="dismiss">🗙</span>
+    <a href="" class="reload">Reload</a>
+    <a class="dismiss">🗙</a>
 </div>
+
+@code {
+    private List<BreadcrumbItem> Crumbs = new();
+
+    protected override void OnParametersSet()
+    {
+        GenerateBreadcrumbs();
+    }
+
+    private void GenerateBreadcrumbs()
+    {
+        Crumbs.Clear();
+        var uri = new Uri(NavManager.Uri);
+        var segments = uri.AbsolutePath.Split(new[] { '/' }, StringSplitOptions.RemoveEmptyEntries);
+
+        if (uri.AbsolutePath != "/")
+        {
+            Crumbs.Add(new BreadcrumbItem { Name = "Home", Url = "/" });
+            for (int index = 0; index < segments.Length; index++)
+            {
+                var segment = segments[index];
+                var titleCaseSegment = System.Globalization.CultureInfo.CurrentCulture.TextInfo.ToTitleCase(segment);
+                var url = "/" + string.Join("/", segments.Take(index + 1));
+
+                Crumbs.Add(new BreadcrumbItem { Name = titleCaseSegment, Url = url });
+            }
+        }
+    }
+}

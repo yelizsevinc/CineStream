@@ -1,0 +1,22 @@
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    @for (var i = 0; i < Crumbs.Count; i++)
+    {
+      <li class="@(i == Crumbs.Count - 1 ? "breadcrumb-item active" : "breadcrumb-item")">
+        @if (i != Crumbs.Count - 1)
+        {
+          <a href="@Crumbs[i].Url">@Crumbs[i].Name</a>
+        }
+        else
+        {
+          <span>@Crumbs[i].Name</span>
+        }
+      </li>
+    }
+  </ol>
+</nav>
+
+@code {
+  [Parameter]
+  public List<BreadcrumbItem> Crumbs { get; set; } = new();
+}
