@@ -1,0 +1,42 @@
+﻿@page "/shows"
+@using Microsoft.EntityFrameworkCore
+@using CineStream.Data
+
+@inject IDbContextFactory<CineStreamContext> DbFactory
+
+<PageTitle>Shows</PageTitle>
+
+<Tabs>
+    <Tab>
+        <Header>Shows</Header>
+        <ChildContent>
+            @if (MoviesAndShows != null)
+            {
+                <Datagrid Items="MoviesAndShows">
+                    <DatagridColumn Title="ShowId" TRowData="Show" Field="c => c.ShowId" CanSort="true" CanFilter="true"
+                        FilterImmediately="true" />
+                    <DatagridColumn Title="Title" TRowData="Show" Field="c => c.Title" CanSort="true" CanFilter="true"
+                        FilterImmediately="true" />
+
+                </Datagrid>
+            }
+        </ChildContent>
+    </Tab>
+</Tabs>
+
+@code {
+    private ICollection<Show>? MoviesAndShows { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadDataAsync();
+    }
+
+    private async Task LoadDataAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+
+        MoviesAndShows = await context.Shows!.ToListAsync();
+
+    }
+}

@@ -14,6 +14,7 @@ public class CineStreamContext : DbContext
 
     // List of Owner.
     public DbSet<Platform>? Platforms { get; set; }
+    public DbSet<Show>? Shows { get; set; }
 
     // Define the model.
     // modelBuilder: The ModelBuilder.
