@@ -1,0 +1,44 @@
+﻿@page "/users"
+@using Microsoft.EntityFrameworkCore
+@using CineStream.Data
+
+@inject IDbContextFactory<CineStreamContext> DbFactory
+
+<PageTitle>Users</PageTitle>
+
+<Tabs>
+    <Tab>
+        <Header>Users</Header>
+        <ChildContent>
+            @if (AppUsers != null)
+            {
+                <Datagrid Items="AppUsers">
+                    <DatagridColumn Title="UserId" TRowData="User" Field="c => c.UserId" CanSort="true" CanFilter="true"
+                        FilterImmediately="true" />
+                    <DatagridColumn Title="Username" TRowData="User" Field="c => c.Username" CanSort="true" CanFilter="true"
+                        FilterImmediately="true" />
+                    <DatagridColumn Title="Email" TRowData="User" Field="c => c.Email" CanSort="true" CanFilter="true"
+                        FilterImmediately="true" />
+
+                </Datagrid>
+            }
+        </ChildContent>
+    </Tab>
+</Tabs>
+
+@code {
+    private ICollection<User>? AppUsers { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadDataAsync();
+    }
+
+    private async Task LoadDataAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+
+        AppUsers = await context.Users!.ToListAsync();
+
+    }
+}
