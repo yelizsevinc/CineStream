@@ -10,9 +10,9 @@
     <Tab>
         <Header>Platforms</Header>
         <ChildContent>
-            @if (StreamPlatforms != null)
+            @if (AppPlatforms != null)
             {
-                <Datagrid Items="StreamPlatforms">
+                <Datagrid Items="AppPlatforms">
                     <DatagridColumn Title="PlatformId" TRowData="Platform" Field="c => c.PlatformId" CanSort="true"
                         CanFilter="true" FilterImmediately="true" />
                     <DatagridColumn Title="Name" TRowData="Platform" Field="c => c.Name" CanSort="true" CanFilter="true"
@@ -25,7 +25,7 @@
 </Tabs>
 
 @code {
-    private ICollection<Platform>? StreamPlatforms { get; set; }
+    private ICollection<Platform>? AppPlatforms { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
@@ -36,7 +36,7 @@
     {
         using var context = DbFactory.CreateDbContext();
 
-        StreamPlatforms = await context.Platforms!.ToListAsync();
+        AppPlatforms = await context.Platforms!.ToListAsync();
 
     }
 }

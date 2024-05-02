@@ -10,9 +10,9 @@
     <Tab>
         <Header>Shows</Header>
         <ChildContent>
-            @if (MoviesAndShows != null)
+            @if (AppShows != null)
             {
-                <Datagrid Items="MoviesAndShows">
+                <Datagrid Items="AppShows">
                     <DatagridColumn Title="ShowId" TRowData="Show" Field="c => c.ShowId" CanSort="true" CanFilter="true"
                         FilterImmediately="true" />
                     <DatagridColumn Title="Title" TRowData="Show" Field="c => c.Title" CanSort="true" CanFilter="true"
@@ -25,7 +25,7 @@
 </Tabs>
 
 @code {
-    private ICollection<Show>? MoviesAndShows { get; set; }
+    private ICollection<Show>? AppShows { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
@@ -36,7 +36,7 @@
     {
         using var context = DbFactory.CreateDbContext();
 
-        MoviesAndShows = await context.Shows!.ToListAsync();
+        AppShows = await context.Shows!.ToListAsync();
 
     }
 }
