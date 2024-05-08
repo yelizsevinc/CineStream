@@ -17,7 +17,9 @@
                         CanFilter="true" FilterImmediately="true" />
                     <DatagridColumn Title="Name" TRowData="Platform" Field="c => c.Name" CanSort="true" CanFilter="true"
                         FilterImmediately="true" />
-
+                    <DatagridColumn Title="Users" TRowData="Platform">
+                        <a href="@($"/platforms/{@context?.PlatformId}/users")" class="btn btn-primary">Users</a>
+                    </DatagridColumn>
                 </Datagrid>
             }
         </ChildContent>

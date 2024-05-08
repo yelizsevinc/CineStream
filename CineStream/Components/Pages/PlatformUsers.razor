@@ -1,0 +1,39 @@
+﻿@page "/platforms/{PlatformId}/users"
+@using Microsoft.EntityFrameworkCore
+@using CineStream.Data
+
+@inject IDbContextFactory<CineStreamContext> DbFactory
+
+<PageTitle>Users</PageTitle>
+<h1>Users</h1>
+
+@if (AppPlatformUsers != null)
+{
+    <Datagrid Items="AppPlatformUsers">
+    <DatagridColumn Title="PlatformId" TRowData="PlatformUser" Field="c => c.PlatformId.ToString()" CanSort="true"
+        CanFilter="true" FilterImmediately="true" />
+    <DatagridColumn Title="UserId" TRowData="PlatformUser" Field="c => c.UserId.ToString()" CanSort="true"
+        CanFilter="true" FilterImmediately="true" />
+    <DatagridColumn Title="SubscriptionDate" TRowData="PlatformUser" Field="c => c.SubscriptionDate.ToString()"
+        CanSort="true" CanFilter="true" FilterImmediately="true" />
+</Datagrid>
+}
+
+@code
+{
+    [Parameter]
+    public string? PlatformId { get; set; }
+    private ICollection<PlatformUser>? AppPlatformUsers { get; set; }
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadDataAsync();
+    }
+
+    private async Task LoadDataAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+
+        AppPlatformUsers = await context.PlatformUsers!.ToListAsync();
+    }
+
+}
