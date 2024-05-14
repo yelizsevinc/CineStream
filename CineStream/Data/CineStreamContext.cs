@@ -17,6 +17,7 @@ public class CineStreamContext : DbContext
     public DbSet<Show>? Shows { get; set; }
     public DbSet<User>? Users { get; set; }
     public DbSet<PlatformUser>? PlatformUsers { get; set; }
+    public DbSet<PlatformShow>? PlatformShows { get; set; }
 
     // Define the model.
     // modelBuilder: The ModelBuilder.

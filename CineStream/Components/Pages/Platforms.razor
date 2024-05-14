@@ -20,6 +20,9 @@
                     <DatagridColumn Title="Users" TRowData="Platform">
                         <a href="@($"/platforms/{@context?.PlatformId}/users")" class="btn btn-primary">Users</a>
                     </DatagridColumn>
+                    <DatagridColumn Title="Shows" TRowData="Platform">
+                        <a href="@($"/platforms/{@context?.PlatformId}/shows")" class="btn btn-primary">Shows</a>
+                    </DatagridColumn>
                 </Datagrid>
             }
         </ChildContent>
