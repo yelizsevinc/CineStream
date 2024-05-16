@@ -19,7 +19,9 @@
                         FilterImmediately="true" />
                     <DatagridColumn Title="Email" TRowData="User" Field="c => c.Email" CanSort="true" CanFilter="true"
                         FilterImmediately="true" />
-
+                    <DatagridColumn Title="Shows" TRowData="User">
+                        <a href="@($"/users/{@context?.UserId}/shows")" class="btn btn-primary">Shows</a>
+                    </DatagridColumn>
                 </Datagrid>
             }
         </ChildContent>

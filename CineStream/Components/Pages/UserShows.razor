@@ -1,0 +1,41 @@
+﻿@page "/users/{UserId}/shows"
+@using Microsoft.EntityFrameworkCore
+@using CineStream.Data
+
+@inject IDbContextFactory<CineStreamContext> DbFactory
+
+<PageTitle>Shows</PageTitle>
+<h1>Shows</h1>
+
+@if (AppUserShows != null)
+{
+    <Datagrid Items="AppUserShows">
+    <DatagridColumn Title="UserId" TRowData="UserShow" Field="c => c.UserId.ToString()" CanSort="true" CanFilter="true"
+        FilterImmediately="true" />
+    <DatagridColumn Title="ShowId" TRowData="UserShow" Field="c => c.ShowId.ToString()" CanSort="true" CanFilter="true"
+        FilterImmediately="true" />
+    <DatagridColumn Title="Watched" TRowData="UserShow" Field="c => c.Watched.ToString()" CanSort="true"
+        CanFilter="true" FilterImmediately="true" />
+    <DatagridColumn Title="CreatedAt" TRowData="UserShow" Field="c => c.CreatedAt.ToString()" CanSort="true"
+        CanFilter="true" FilterImmediately="true" />
+</Datagrid>
+}
+
+@code
+{
+    [Parameter]
+    public string? UserId { get; set; }
+    private ICollection<UserShow>? AppUserShows { get; set; }
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadDataAsync();
+    }
+
+    private async Task LoadDataAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+
+        AppUserShows = await context.UserShows!.ToListAsync();
+    }
+
+}
