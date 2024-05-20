@@ -17,7 +17,8 @@
                         FilterImmediately="true" />
                     <DatagridColumn Title="Title" TRowData="Show" Field="c => c.Title" CanSort="true" CanFilter="true"
                         FilterImmediately="true" />
-
+                    <DatagridColumn Title="CreatedAt" TRowData="Show" Field="c => c.CreatedAt.ToString()" CanSort="true"
+                        CanFilter="true" FilterImmediately="true" />
                 </Datagrid>
             }
         </ChildContent>
