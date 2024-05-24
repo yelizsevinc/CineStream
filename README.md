@@ -22,7 +22,7 @@ CineStream project helps managing streaming platforms, media and users in the DB
 - Delete an user from the DB
 - List the shows of a user in DB
 
-### Tech Stack
+## Tech Stack
 
 - Blazor WebAssembly
 - .NET 8.0
