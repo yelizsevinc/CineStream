@@ -6,7 +6,7 @@
 
 <PageTitle>Platforms</PageTitle>
 
-<h1>Platforms</h1>
+<h1><i class="bi bi-tv-fill" aria-hidden="true"></i> Platforms</h1>
 
 <Tabs>
     <Tab>
@@ -22,10 +22,12 @@
                     <DatagridColumn Title="CreatedAt" TRowData="Platform" Field="c => c.CreatedAt.ToString()" CanSort="true"
                         CanFilter="true" FilterImmediately="true" />
                     <DatagridColumn Title="Users" TRowData="Platform">
-                        <a href="@($"/platforms/{@context?.PlatformId}/users")" class="btn btn-primary">Users</a>
+                        <a href="@($"/platforms/{@context?.PlatformId}/users")" class="btn btn-primary"><i
+                                class="bi bi-people-fill" aria-hidden="true"></i> Users</a>
                     </DatagridColumn>
                     <DatagridColumn Title="Shows" TRowData="Platform">
-                        <a href="@($"/platforms/{@context?.PlatformId}/shows")" class="btn btn-primary">Shows</a>
+                        <a href="@($"/platforms/{@context?.PlatformId}/shows")" class="btn btn-primary"><i
+                                class="bi bi-camera-reels-fill" aria-hidden="true"></i> Shows</a>
                     </DatagridColumn>
                 </Datagrid>
             }
