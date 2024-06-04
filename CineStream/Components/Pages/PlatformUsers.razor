@@ -5,18 +5,23 @@
 
 @inject IDbContextFactory<CineStreamContext> DbFactory
 
-<PageTitle>Users</PageTitle>
+<PageTitle>Users of @PlatformId</PageTitle>
 
-<h1><i class="bi bi-people-fill" aria-hidden="true"></i> Users</h1>
-
-@if (AppPlatformUsers != null)
+@if ((appPlatform != null) && (appPlatform.Name != null))
 {
-    <Datagrid Items="AppPlatformUsers">
-    <DatagridColumn Title="PlatformId" TRowData="PlatformUser" Field="c => c.PlatformId.ToString()" CanSort="true"
-        CanFilter="true" FilterImmediately="true" />
-    <DatagridColumn Title="UserId" TRowData="PlatformUser" Field="c => c.UserId.ToString()" CanSort="true"
-        CanFilter="true" FilterImmediately="true" />
-    <DatagridColumn Title="SubscriptionDate" TRowData="PlatformUser" Field="c => c.SubscriptionDate.ToString()"
+    <h1><i class="bi bi-people-fill" aria-hidden="true"></i> Users of @appPlatform.Name</h1>
+}
+
+@if (appUsers != null)
+{
+    <Datagrid Items="appUsers">
+    <DatagridColumn Title="UserId" TRowData="AppUser" Field="c => c.UserId.ToString()" CanSort="true" CanFilter="true"
+        FilterImmediately="true" />
+    <DatagridColumn Title="Username" TRowData="AppUser" Field="c => c.Username" CanSort="true" CanFilter="true"
+        FilterImmediately="true" />
+    <DatagridColumn Title="Email" TRowData="AppUser" Field="c => c.Email" CanSort="true" CanFilter="true"
+        FilterImmediately="true" />
+    <DatagridColumn Title="SubscriptionDate" TRowData="AppUser" Field="c => c.SubscriptionDate.ToString()"
         CanSort="true" CanFilter="true" FilterImmediately="true" />
 </Datagrid>
 }
@@ -25,7 +30,9 @@
 {
     [Parameter]
     public string? PlatformId { get; set; }
-    private ICollection<PlatformUser>? AppPlatformUsers { get; set; }
+    private Platform? appPlatform { get; set; }
+    private ICollection<PlatformUser>? appPlatformUsers { get; set; }
+    private ICollection<AppUser>? appUsers { get; set; }
     protected override async Task OnInitializedAsync()
     {
         await LoadDataAsync();
@@ -35,7 +42,31 @@
     {
         using var context = DbFactory.CreateDbContext();
 
-        AppPlatformUsers = await context.PlatformUsers!.ToListAsync();
+        appUsers = new List<AppUser>();
+        appPlatform = await context.Platforms!.FirstOrDefaultAsync(c => c.PlatformId.ToString() == PlatformId);
+
+        var allPlatformUsers = await context.PlatformUsers!.ToListAsync();
+        var platformUsers = allPlatformUsers.Where(c => c.PlatformId.ToString() == PlatformId).ToList();
+        var allUsers = await context.Users!.ToListAsync();
+        appPlatformUsers = allPlatformUsers.Where(c => c.PlatformId.ToString() == PlatformId).ToList();
+
+
+        foreach (var platformUser in appPlatformUsers)
+        {
+            var user = await context.Users!.FirstOrDefaultAsync(u => u.UserId == platformUser.UserId);
+            if (user != null)
+            {
+                var appUser = new AppUser
+                    {
+                        UserId = user.UserId,
+                        Username = user.Username,
+                        Email = user.Email,
+                        SubscriptionDate = platformUser.SubscriptionDate
+                    };
+                appUsers.Add(appUser);
+            }
+        }
+
     }
 
 }
