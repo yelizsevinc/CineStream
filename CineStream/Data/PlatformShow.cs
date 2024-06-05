@@ -9,7 +9,3 @@ public class PlatformShow
     public int ShowId { get; set; }
     public DateTime? AddedToPlatformDate { get; set; }
 }
-
-
-
-

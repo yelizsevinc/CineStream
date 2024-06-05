@@ -6,16 +6,21 @@
 
 <PageTitle>Shows</PageTitle>
 
-<h1><i class="bi bi-camera-reels-fill" aria-hidden="true"></i> Shows</h1>
-
-@if (AppPlatformShows != null)
+@if ((appPlatform != null) && (appPlatform.Name != null))
 {
-    <Datagrid Items="AppPlatformShows">
-    <DatagridColumn Title="PlatformId" TRowData="PlatformShow" Field="c => c.PlatformId.ToString()" CanSort="true"
+    <h1><i class="bi bi-camera-reels-fill" aria-hidden="true"></i> Shows of @appPlatform.Name</h1>
+}
+
+@if (appShows != null)
+{
+    <Datagrid Items="appShows">
+    <DatagridColumn Title="ShowId" TRowData="AppShow" Field="c => c.ShowId.ToString()" CanSort="true" CanFilter="true"
+        FilterImmediately="true" />
+    <DatagridColumn Title="Title" TRowData="AppShow" Field="c => c.Title" CanSort="true" CanFilter="true"
+        FilterImmediately="true" />
+    <DatagridColumn Title="CreatedAt" TRowData="AppShow" Field="c => c.CreatedAt.ToString()" CanSort="true"
         CanFilter="true" FilterImmediately="true" />
-    <DatagridColumn Title="ShowId" TRowData="PlatformShow" Field="c => c.ShowId.ToString()" CanSort="true"
-        CanFilter="true" FilterImmediately="true" />
-    <DatagridColumn Title="AddedToPlatformDate" TRowData="PlatformShow" Field="c => c.AddedToPlatformDate.ToString()"
+    <DatagridColumn Title="AddedToPlatformDate" TRowData="AppShow" Field="c => c.AddedToPlatformDate.ToString()"
         CanSort="true" CanFilter="true" FilterImmediately="true" />
 </Datagrid>
 }
@@ -24,7 +29,9 @@
 {
     [Parameter]
     public string? PlatformId { get; set; }
-    private ICollection<PlatformShow>? AppPlatformShows { get; set; }
+    private Platform? appPlatform { get; set; }
+    private ICollection<PlatformShow>? appPlatformShows { get; set; }
+    private ICollection<AppShow>? appShows { get; set; }
     protected override async Task OnInitializedAsync()
     {
         await LoadDataAsync();
@@ -34,7 +41,30 @@
     {
         using var context = DbFactory.CreateDbContext();
 
-        AppPlatformShows = await context.PlatformShows!.ToListAsync();
-    }
+        appShows = new List<AppShow>();
+        appPlatform = await context.Platforms!.FirstOrDefaultAsync(c => c.PlatformId.ToString() == PlatformId);
 
+        var allPlatformShows = await context.PlatformShows!.ToListAsync();
+        var platformShows = allPlatformShows.Where(c => c.PlatformId.ToString() == PlatformId).ToList();
+        var allShows = await context.Shows!.ToListAsync();
+        appPlatformShows = allPlatformShows.Where(c => c.PlatformId.ToString() == PlatformId).ToList();
+
+
+        foreach (var platformShow in appPlatformShows)
+        {
+            var Show = await context.Shows!.FirstOrDefaultAsync(u => u.ShowId == platformShow.ShowId);
+            if (Show != null)
+            {
+                var appShow = new AppShow
+                    {
+                        ShowId = Show.ShowId,
+                        Title = Show.Title,
+                        CreatedAt = Show.CreatedAt,
+                        AddedToPlatformDate = platformShow.AddedToPlatformDate
+                    };
+                appShows.Add(appShow);
+            }
+        }
+
+    }
 }
