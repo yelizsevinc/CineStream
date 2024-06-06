@@ -9,7 +9,3 @@ public class PlatformUser
     public int UserId { get; set; }
     public DateTime? SubscriptionDate { get; set; }
 }
-
-
-
-
