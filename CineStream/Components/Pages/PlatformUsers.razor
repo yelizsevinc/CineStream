@@ -12,16 +12,16 @@
     <h1><i class="bi bi-people-fill" aria-hidden="true"></i> Users of @appPlatform.Name</h1>
 }
 
-@if (appUsers != null)
+@if (appPlatformUsers != null)
 {
-    <Datagrid Items="appUsers">
-    <DatagridColumn Title="UserId" TRowData="AppUser" Field="c => c.UserId.ToString()" CanSort="true" CanFilter="true"
+    <Datagrid Items="appPlatformUsers">
+    <DatagridColumn Title="UserId" TRowData="appPlatformUser" Field="c => c.UserId.ToString()" CanSort="true"
+        CanFilter="true" FilterImmediately="true" />
+    <DatagridColumn Title="Username" TRowData="appPlatformUser" Field="c => c.Username" CanSort="true" CanFilter="true"
         FilterImmediately="true" />
-    <DatagridColumn Title="Username" TRowData="AppUser" Field="c => c.Username" CanSort="true" CanFilter="true"
+    <DatagridColumn Title="Email" TRowData="appPlatformUser" Field="c => c.Email" CanSort="true" CanFilter="true"
         FilterImmediately="true" />
-    <DatagridColumn Title="Email" TRowData="AppUser" Field="c => c.Email" CanSort="true" CanFilter="true"
-        FilterImmediately="true" />
-    <DatagridColumn Title="SubscriptionDate" TRowData="AppUser" Field="c => c.SubscriptionDate.ToString()"
+    <DatagridColumn Title="SubscriptionDate" TRowData="appPlatformUser" Field="c => c.SubscriptionDate.ToString()"
         CanSort="true" CanFilter="true" FilterImmediately="true" />
 </Datagrid>
 }
@@ -32,7 +32,7 @@
     public string? PlatformId { get; set; }
     private Platform? appPlatform { get; set; }
     private ICollection<PlatformUser>? appPlatformUsers { get; set; }
-    private ICollection<AppUser>? appUsers { get; set; }
+    private ICollection<appPlatformUser>? appPlatformUsers { get; set; }
     protected override async Task OnInitializedAsync()
     {
         await LoadDataAsync();
@@ -42,7 +42,7 @@
     {
         using var context = DbFactory.CreateDbContext();
 
-        appUsers = new List<AppUser>();
+        appPlatformUsers = new List<appPlatformUser>();
         appPlatform = await context.Platforms!.FirstOrDefaultAsync(c => c.PlatformId.ToString() == PlatformId);
 
         var allPlatformUsers = await context.PlatformUsers!.ToListAsync();
@@ -56,14 +56,14 @@
             var user = await context.Users!.FirstOrDefaultAsync(u => u.UserId == platformUser.UserId);
             if (user != null)
             {
-                var appUser = new AppUser
+                var appPlatformUser = new appPlatformUser
                     {
                         UserId = user.UserId,
                         Username = user.Username,
                         Email = user.Email,
                         SubscriptionDate = platformUser.SubscriptionDate
                     };
-                appUsers.Add(appUser);
+                appPlatformUsers.Add(appPlatformUser);
             }
         }
 

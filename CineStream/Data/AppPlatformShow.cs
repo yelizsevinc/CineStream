@@ -1,4 +1,4 @@
-public class AppShow
+public class AppPlatformShow
 {
     public int ShowId { get; set; }
     public string? Title { get; set; }

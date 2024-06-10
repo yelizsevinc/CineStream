@@ -1,4 +1,4 @@
-public class AppUser
+public class AppPlatformUser
 {
     public int UserId { get; set; }
     public string? Username { get; set; }
