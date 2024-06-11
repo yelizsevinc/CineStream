@@ -8,5 +8,6 @@ public class Show
     [Required]
     [StringLength(200, ErrorMessage = "Title cannot exceed 200 characters.")]
     public string? Title { get; set; }
+    public DateTime? ReleaseDate { get; set; }
     public DateTime? CreatedAt { get; set; }
 }

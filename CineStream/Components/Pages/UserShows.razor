@@ -7,18 +7,23 @@
 
 <PageTitle>Shows</PageTitle>
 
-<h1><i class="bi bi-camera-reels-fill" aria-hidden="true"></i> Shows</h1>
+@if ((appUser != null) && (appUser.Username != null))
+{
+    <h1><i class="bi bi-camera-reels-fill" aria-hidden="true"></i> Shows of @appUser.Username</h1>
+}
 
 @if (AppUserShows != null)
 {
     <Datagrid Items="AppUserShows">
-    <DatagridColumn Title="UserId" TRowData="UserShow" Field="c => c.UserId.ToString()" CanSort="true" CanFilter="true"
-        FilterImmediately="true" />
-    <DatagridColumn Title="ShowId" TRowData="UserShow" Field="c => c.ShowId.ToString()" CanSort="true" CanFilter="true"
-        FilterImmediately="true" />
-    <DatagridColumn Title="Watched" TRowData="UserShow" Field="c => c.Watched.ToString()" CanSort="true"
+    <DatagridColumn Title="ShowId" TRowData="AppUserShow" Field="c => c.ShowId.ToString()" CanSort="true"
         CanFilter="true" FilterImmediately="true" />
-    <DatagridColumn Title="CreatedAt" TRowData="UserShow" Field="c => c.CreatedAt.ToString()" CanSort="true"
+    <DatagridColumn Title="Title" TRowData="AppUserShow" Field="c => c.Title" CanSort="true" CanFilter="true"
+        FilterImmediately="true" />
+    <DatagridColumn Title="ReleaseDate" TRowData="AppUserShow" Field="c => c.ReleaseDate.ToString()" CanSort="true"
+        CanFilter="true" FilterImmediately="true" />
+    <DatagridColumn Title="Watched" TRowData="AppUserShow" Field="c => c.Watched.ToString()" CanSort="true"
+        CanFilter="true" FilterImmediately="true" />
+    <DatagridColumn Title="CreatedAt" TRowData="AppUserShow" Field="c => c.CreatedAt.ToString()" CanSort="true"
         CanFilter="true" FilterImmediately="true" />
 </Datagrid>
 }
@@ -27,7 +32,9 @@
 {
     [Parameter]
     public string? UserId { get; set; }
-    private ICollection<UserShow>? AppUserShows { get; set; }
+    private User? appUser { get; set; }
+    private ICollection<UserShow>? appUserShows { get; set; }
+    private ICollection<AppUserShow>? AppUserShows { get; set; }
     protected override async Task OnInitializedAsync()
     {
         await LoadDataAsync();
@@ -37,7 +44,31 @@
     {
         using var context = DbFactory.CreateDbContext();
 
-        AppUserShows = await context.UserShows!.ToListAsync();
-    }
+        AppUserShows = new List<AppUserShow>();
+        appUser = await context.Users!.FirstOrDefaultAsync(c => c.UserId.ToString() == UserId);
 
+        var allUserShows = await context.UserShows!.ToListAsync();
+        var userShows = allUserShows.Where(c => c.UserId.ToString() == UserId).ToList();
+        var allShows = await context.Shows!.ToListAsync();
+        appUserShows = allUserShows.Where(c => c.UserId.ToString() == UserId).ToList();
+
+
+        foreach (var userShow in appUserShows)
+        {
+            var Show = await context.Shows!.FirstOrDefaultAsync(u => u.ShowId == userShow.ShowId);
+            if (Show != null)
+            {
+                var appUserShow = new AppUserShow
+                    {
+                        ShowId = Show.ShowId,
+                        Title = Show.Title,
+                        ReleaseDate = Show.ReleaseDate,
+                        Watched = userShow.Watched,
+                        CreatedAt = userShow.CreatedAt
+                    };
+                AppUserShows.Add(appUserShow);
+            }
+        }
+
+    }
 }

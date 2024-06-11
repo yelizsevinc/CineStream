@@ -18,6 +18,8 @@
         CanFilter="true" FilterImmediately="true" />
     <DatagridColumn Title="Title" TRowData="AppPlatformShow" Field="c => c.Title" CanSort="true" CanFilter="true"
         FilterImmediately="true" />
+    <DatagridColumn Title="ReleaseDate" TRowData="AppPlatformShow" Field="c => c.ReleaseDate.ToString()" CanSort="true"
+        CanFilter="true" FilterImmediately="true" />
     <DatagridColumn Title="CreatedAt" TRowData="AppPlatformShow" Field="c => c.CreatedAt.ToString()" CanSort="true"
         CanFilter="true" FilterImmediately="true" />
     <DatagridColumn Title="AddedToPlatformDate" TRowData="AppPlatformShow" Field="c => c.AddedToPlatformDate.ToString()"
@@ -52,17 +54,17 @@
 
         foreach (var platformShow in appPlatformShows)
         {
-            var Show = await context.Shows!.FirstOrDefaultAsync(u => u.ShowId == platformShow.ShowId);
-            if (Show != null)
+            var show = await context.Shows!.FirstOrDefaultAsync(u => u.ShowId == platformShow.ShowId);
+            if (show != null)
             {
-                var AppPlatformShow = new AppPlatformShow
+                var appPlatformShow = new AppPlatformShow
                     {
-                        ShowId = Show.ShowId,
-                        Title = Show.Title,
-                        CreatedAt = Show.CreatedAt,
+                        ShowId = show.ShowId,
+                        Title = show.Title,
+                        CreatedAt = show.CreatedAt,
                         AddedToPlatformDate = platformShow.AddedToPlatformDate
                     };
-                AppPlatformShows.Add(AppPlatformShow);
+                AppPlatformShows.Add(appPlatformShow);
             }
         }
 
