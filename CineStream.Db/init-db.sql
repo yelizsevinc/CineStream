@@ -1,5 +1,3 @@
-DELETE DATABASE CineStreamDB;
-
 CREATE DATABASE CineStreamDB;
 GO
 
