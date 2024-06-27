@@ -6,30 +6,44 @@
 
 <PageTitle>User</PageTitle>
 
-@if ((appUser != null) && (appUser.Username != null))
+@if ((appUser != null) && (appUser.Username != null) && (appUser.Details != null))
 {
     <h1><i class="bi bi-camera-reels-fill" aria-hidden="true"></i> @appUser.Username</h1>
 
     <div class="clr-row">
-        <div class="clr-col-lg-6 clr-col-12">
-            <Card>
-                <CardHeader>
-                    <NavLink href=@($"users/{UserId}/shows")><i class="bi bi-camera-reels-fill" aria-hidden="true"></i>
-                        Shows</NavLink>
-                </CardHeader>
-                <CardBody>
-                    <CardBlock>
-                        <CardText>
-                            <ul>
-                                <li>List the shows in the DB</li>
-                                <li>Delete a show from the DB</li>
-                            </ul>
-                        </CardText>
-                    </CardBlock>
-                </CardBody>
-            </Card>
-        </div>
+    <div class="clr-col-12">
+        <Card>
+            <CardHeader>
+                <i class="bi bi-info-circle-fill" aria-hidden="true"></i> Details
+            </CardHeader>
+            <CardBody>
+                <CardBlock>
+                    <CardText>
+                        @appUser.Details
+                    </CardText>
+                </CardBlock>
+            </CardBody>
+        </Card>
     </div>
+    <div class="clr-col-lg-6 clr-col-12">
+        <Card>
+            <CardHeader>
+                <NavLink href=@($"users/{UserId}/shows")><i class="bi bi-camera-reels-fill" aria-hidden="true"></i>
+                    Shows</NavLink>
+            </CardHeader>
+            <CardBody>
+                <CardBlock>
+                    <CardText>
+                        <ul>
+                            <li>List the shows in the DB</li>
+                            <li>Delete a show from the DB</li>
+                        </ul>
+                    </CardText>
+                </CardBlock>
+            </CardBody>
+        </Card>
+    </div>
+</div>
 }
 
 @code

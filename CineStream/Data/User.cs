@@ -11,5 +11,6 @@ public class User
     [Required]
     [StringLength(255, ErrorMessage = "Email cannot exceed 255 characters.")]
     public string? Email { get; set; }
+    public string? Details { get; set; }
     public DateTime? CreatedAt { get; set; }
 }
