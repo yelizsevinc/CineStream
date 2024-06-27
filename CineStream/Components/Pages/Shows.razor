@@ -23,6 +23,10 @@
                         CanFilter="true" FilterImmediately="true" />
                     <DatagridColumn Title="CreatedAt" TRowData="Show" Field="c => c.CreatedAt.ToString()" CanSort="true"
                         CanFilter="true" FilterImmediately="true" />
+                    <DatagridColumn Title="Details" TRowData="Show">
+                        <a href="@($"/shows/{@context?.ShowId}")" class="btn btn-primary"><i class="bi bi-camera-reels-fill"
+                                aria-hidden="true"></i> Details</a>
+                    </DatagridColumn>
                 </Datagrid>
             }
         </ChildContent>
