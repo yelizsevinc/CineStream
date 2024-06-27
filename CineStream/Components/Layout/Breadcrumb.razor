@@ -1,5 +1,11 @@
 <nav aria-label="breadcrumb">
   <ol class="breadcrumb">
+    @* If there are no crumbs, add an empty one to dedicate the same space *@
+    @if (Crumbs.Count < 1)
+    {
+      <li class="breadcrumb-item active">&nbsp;</li>
+    }
+
     @for (var i = 0; i < Crumbs.Count; i++)
     {
       <li class="@(i == Crumbs.Count - 1 ? "breadcrumb-item active" : "breadcrumb-item")">
