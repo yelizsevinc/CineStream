@@ -1,0 +1,45 @@
+@page "/platforms/new"
+@using Microsoft.EntityFrameworkCore
+@using CineStream.Data
+
+@inject IDbContextFactory<CineStreamContext> DbFactory
+
+@inject NavigationManager NavManager
+
+<PageTitle>New Platform</PageTitle>
+
+<h1><i class="bi bi-plus-circle-fill" aria-hidden="true"></i> New Platform</h1>
+
+<div class="clr-row">
+    <div class="clr-col-lg-6 clr-col-12">
+        <Card>
+            <CardBody>
+                <CardBlock>
+                    <Form Model="newPlatform" OnValidSubmit="HandleValidSubmit" Layout="FormLayout.Vertical">
+                        <DataAnnotationsValidator />
+
+                        <Text @bind-Value="newPlatform.Name" Label="Name" HelpText="Platform Name"
+                            ValidationFor="() => newPlatform.Name" />
+                        <Textarea @bind-Value="newPlatform.Details" Label="Details" HelpText="Platform Details"
+                            ValidationFor="() => newPlatform.Details" />
+
+                        <Button class="mt-3" Variant="Primary" type="submit">Submit</Button>
+                    </Form>
+                </CardBlock>
+            </CardBody>
+        </Card>
+    </div>
+</div>
+
+@code {
+    private Platform newPlatform = new Platform();
+
+    private async Task HandleValidSubmit()
+    {
+        using var context = await DbFactory.CreateDbContextAsync();
+        newPlatform.CreatedAt = DateTime.Now;
+        context.Platforms.Add(newPlatform);
+        await context.SaveChangesAsync();
+        NavManager.NavigateTo("/platforms");
+    }
+}

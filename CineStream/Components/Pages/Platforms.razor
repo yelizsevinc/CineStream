@@ -12,6 +12,11 @@
     <Tab>
         <Header>Platforms</Header>
         <ChildContent>
+            <NavLink href="/platforms/new">
+                <Button Variant="Primary">
+                    <i class="bi bi-plus-circle-fill" aria-hidden="true"></i> New Platform
+                </Button>
+            </NavLink>
             @if (AppPlatforms != null)
             {
                 <Datagrid Items="AppPlatforms">
