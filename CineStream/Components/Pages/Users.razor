@@ -12,6 +12,11 @@
     <Tab>
         <Header>Users</Header>
         <ChildContent>
+            <NavLink href="/users/new">
+                <Button Variant="Primary">
+                    <i class="bi bi-plus-circle-fill" aria-hidden="true"></i> New User
+                </Button>
+            </NavLink>
             @if (AppUsers != null)
             {
                 <Datagrid Items="AppUsers">
