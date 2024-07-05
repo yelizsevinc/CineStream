@@ -12,6 +12,11 @@
     <Tab>
         <Header>Shows</Header>
         <ChildContent>
+            <NavLink href="/shows/new">
+                <Button Variant="Primary">
+                    <i class="bi bi-plus-circle-fill" aria-hidden="true"></i> New Show
+                </Button>
+            </NavLink>
             @if (AppShows != null)
             {
                 <Datagrid Items="AppShows">
