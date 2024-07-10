@@ -11,9 +11,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Blazority" Version="1.1.1" />
+    <PackageReference Include="Blazority" Version="2.0.1" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="8.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="8.0.0" PrivateAssets="all" />
+    <PackageReference Include="System.Text.Json" Version="8.0.4" VersionOverride="8.0.4" />
   </ItemGroup>
 
   <ItemGroup>

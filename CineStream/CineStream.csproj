@@ -10,12 +10,16 @@
 
   <PropertyGroup Condition=" '$(RunConfiguration)' == 'https' " />
   <PropertyGroup Condition=" '$(RunConfiguration)' == 'http' " />
+  <PropertyGroup>
+    <CentralPackageTransitivePinningEnabled>true</CentralPackageTransitivePinningEnabled>
+  </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Blazority" Version="1.1.1" />
+    <PackageReference Include="Blazority" Version="2.0.1" />
     <ProjectReference Include="..\CineStream.Client\CineStream.Client.csproj" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="8.0.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.0" />
+    <PackageReference Include="System.Text.Json" Version="8.0.4" VersionOverride="8.0.4" />
   </ItemGroup>
 
 </Project>
