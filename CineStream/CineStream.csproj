@@ -22,6 +22,7 @@
     <PackageReference Include="System.Text.Json" Version="8.0.4" VersionOverride="8.0.4" />
     <PackageReference Include="Azure.Identity" Version="1.11.4" VersionOverride="1.11.4" />
     <PackageReference Include="Microsoft.Data.SqlClient" Version="5.1.3" VersionOverride="5.1.3" />
+    <PackageReference Include="Microsoft.IdentityModel.JsonWebTokens" Version="6.34.0" VersionOverride="6.34.0" />
   </ItemGroup>
 
 </Project>
