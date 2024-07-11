@@ -38,7 +38,7 @@
     {
         using var context = await DbFactory.CreateDbContextAsync();
         newPlatform.CreatedAt = DateTime.Now;
-        context.Platforms.Add(newPlatform);
+        context.Platforms?.Add(newPlatform);
         await context.SaveChangesAsync();
         NavManager.NavigateTo("/platforms");
     }

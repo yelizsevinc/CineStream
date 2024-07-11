@@ -40,7 +40,7 @@
     {
         using var context = await DbFactory.CreateDbContextAsync();
         newUser.CreatedAt = DateTime.Now;
-        context.Users.Add(newUser);
+        context.Users?.Add(newUser);
         await context.SaveChangesAsync();
         NavManager.NavigateTo("/users");
     }

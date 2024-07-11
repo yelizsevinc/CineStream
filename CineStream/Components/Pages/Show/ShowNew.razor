@@ -41,7 +41,7 @@
     {
         using var context = await DbFactory.CreateDbContextAsync();
         newShow.CreatedAt = DateTime.Now;
-        context.Shows.Add(newShow);
+        context.Shows?.Add(newShow);
         await context.SaveChangesAsync();
         NavManager.NavigateTo("/shows");
     }
