@@ -25,6 +25,20 @@
             </CardBody>
         </Card>
     </div>
+    <div class="clr-col-12">
+        <Card>
+            <CardHeader>
+                <i class="bi bi-info-circle-fill" aria-hidden="true"></i> Platform
+            </CardHeader>
+            <CardBody>
+                <CardBlock>
+                    <CardText>
+                        @appShowPlatform.Name
+                    </CardText>
+                </CardBlock>
+            </CardBody>
+        </Card>
+    </div>
 </div>
 }
 
@@ -33,6 +47,7 @@
     [Parameter]
     public string? ShowId { get; set; }
     private Show? appShow { get; set; }
+    private Platform? appShowPlatform;
     protected override async Task OnInitializedAsync()
     {
         await LoadDataAsync();
@@ -43,6 +58,11 @@
         using var context = DbFactory.CreateDbContext();
 
         appShow = await context.Shows!.FirstOrDefaultAsync(c => c.ShowId.ToString() == ShowId);
+        if (appShow != null)
+        {
+            var platformShow = await context.PlatformShows!.FirstOrDefaultAsync(c => c.ShowId == appShow.ShowId);
+            appShowPlatform = await context.Platforms!.FirstOrDefaultAsync(c => c.PlatformId == platformShow.PlatformId);
+        }
 
     }
 
