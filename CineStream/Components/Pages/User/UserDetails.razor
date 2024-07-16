@@ -43,7 +43,26 @@
             </CardBody>
         </Card>
     </div>
-</div>
+    <div class="clr-col-12">
+        <Card>
+            <CardHeader>
+                <i class="bi bi-tv-fill" aria-hidden="true"></i> Platforms
+            </CardHeader>
+            <CardBody>
+                <CardBlock>
+                    <CardText>
+                        @foreach (var appUserPlatform in appUserPlatforms)
+                            {
+                                <ul>
+                                    <li>@appUserPlatform.Name</li>
+                                </ul>
+                            }
+                        </CardText>
+                    </CardBlock>
+                </CardBody>
+            </Card>
+        </div>
+    </div>
 }
 
 @code
@@ -51,6 +70,7 @@
     [Parameter]
     public string? UserId { get; set; }
     private User? appUser { get; set; }
+    private ICollection<Platform>? appUserPlatforms = new List<Platform>();
     protected override async Task OnInitializedAsync()
     {
         await LoadDataAsync();
@@ -61,7 +81,16 @@
         using var context = DbFactory.CreateDbContext();
 
         appUser = await context.Users!.FirstOrDefaultAsync(c => c.UserId.ToString() == UserId);
+        if (appUser != null)
+        {
+            var platformUsers = await context.PlatformUsers!.Where(c => c.UserId == appUser.UserId).ToListAsync();
 
+            foreach (var platformUser in platformUsers)
+            {
+                var platform = await context.Platforms!.FirstOrDefaultAsync(c => c.PlatformId == platformUser.PlatformId);
+                appUserPlatforms.Add(platform);
+            }
+        }
     }
 
 }
