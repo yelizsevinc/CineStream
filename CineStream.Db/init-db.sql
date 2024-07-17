@@ -168,11 +168,11 @@ INSERT INTO PlatformUsers (PlatformID, UserID, SubscriptionDate)
     FROM Platforms, Users
     WHERE Platforms.Name = 'Amazon Prime' AND Users.Username = 'Bob';
 
--- Charlie subscribed to Netflix
+-- Charlie subscribed to YouTube
 INSERT INTO PlatformUsers (PlatformID, UserID, SubscriptionDate)
     SELECT PlatformID, UserID, GETDATE()
     FROM Platforms, Users
-    WHERE Platforms.Name = 'Netflix' AND Users.Username = 'Charlie';
+    WHERE Platforms.Name = 'YouTube' AND Users.Username = 'Charlie';
 GO
 
 -- Insert UserShows
