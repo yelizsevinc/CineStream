@@ -35,36 +35,39 @@
             <CardBody>
                 <CardBlock>
                     <CardText>
-                        <ul>
-                            <li>List the shows in the DB</li>
-                            <li>Delete a show from the DB</li>
-                        </ul>
-                    </CardText>
-                </CardBlock>
-            </CardBody>
-        </Card>
+                        @foreach (var appPlatformShow in appPlatformShows)
+                            {
+                                <ul>
+                                    <li>@appPlatformShow.Title</li>
+                                </ul>
+                            }
+                        </CardText>
+                    </CardBlock>
+                </CardBody>
+            </Card>
+        </div>
+        <div class="clr-col-lg-6 clr-col-12">
+            <Card>
+                <CardHeader>
+                    <NavLink href=@($"platforms/{PlatformId}/users")><i class="bi bi-people-fill" aria-hidden="true"></i>
+                        Users
+                    </NavLink>
+                </CardHeader>
+                <CardBody>
+                    <CardBlock>
+                        <CardText>
+                            @foreach (var appPlatformUser in appPlatformUsers)
+                            {
+                                <ul>
+                                    <li>@appPlatformUser.Username</li>
+                                </ul>
+                            }
+                        </CardText>
+                    </CardBlock>
+                </CardBody>
+            </Card>
+        </div>
     </div>
-    <div class="clr-col-lg-6 clr-col-12">
-        <Card>
-            <CardHeader>
-                <NavLink href=@($"platforms/{PlatformId}/users")><i class="bi bi-people-fill" aria-hidden="true"></i>
-                    Users
-                </NavLink>
-            </CardHeader>
-            <CardBody>
-                <CardBlock>
-                    <CardText>
-                        <ul>
-                            <li>List the users in the DB</li>
-                            <li>Delete a user from the DB</li>
-                            <li>List the shows of a user in DB</li>
-                        </ul>
-                    </CardText>
-                </CardBlock>
-            </CardBody>
-        </Card>
-    </div>
-</div>
 }
 
 @code
@@ -72,6 +75,8 @@
     [Parameter]
     public string? PlatformId { get; set; }
     private Platform? appPlatform { get; set; }
+    private ICollection<User>? appPlatformUsers = new List<User>();
+    private ICollection<Show>? appPlatformShows = new List<Show>();
     protected override async Task OnInitializedAsync()
     {
         await LoadDataAsync();
@@ -82,7 +87,24 @@
         using var context = DbFactory.CreateDbContext();
 
         appPlatform = await context.Platforms!.FirstOrDefaultAsync(c => c.PlatformId.ToString() == PlatformId);
+        if (appPlatform != null)
+        {
+            var platformUsers = await context.PlatformUsers!.Where(c => c.PlatformId == appPlatform.PlatformId).ToListAsync();
 
+            foreach (var platformUser in platformUsers)
+            {
+                var user = await context.Users!.FirstOrDefaultAsync(c => c.UserId == platformUser.UserId);
+                appPlatformUsers.Add(user);
+            }
+
+            var platformShows = await context.PlatformShows!.Where(c => c.PlatformId == appPlatform.PlatformId).ToListAsync();
+
+            foreach (var platformShow in platformShows)
+            {
+                var show = await context.Shows!.FirstOrDefaultAsync(c => c.ShowId == platformShow.ShowId);
+                appPlatformShows.Add(show);
+            }
+        }
     }
 
 }
