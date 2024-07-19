@@ -25,29 +25,60 @@
             </CardBody>
         </Card>
     </div>
-    <div class="clr-col-12">
+    <div class="clr-col-lg-6 clr-col-12">
         <Card>
             <CardHeader>
-                <i class="bi bi-tv-fill" aria-hidden="true"></i> Platform
+                <NavLink href=@($"platforms")><i class="bi bi-tv-fill" aria-hidden="true"></i> Platforms</NavLink>
             </CardHeader>
             <CardBody>
                 <CardBlock>
                     <CardText>
-                        @appShowPlatform.Name
-                    </CardText>
-                </CardBlock>
-            </CardBody>
-        </Card>
+                        @if (appShowPlatforms != null)
+                            {
+                                @foreach (var appShowPlatform in appShowPlatforms)
+                                {
+                                    <ul>
+                                        <li>@appShowPlatform.Name</li>
+                                    </ul>
+                                }
+                            }
+                        </CardText>
+                    </CardBlock>
+                </CardBody>
+            </Card>
+        </div>
+
+        <div class="clr-col-lg-6 clr-col-12">
+            <Card>
+                <CardHeader>
+                    <NavLink href=@($"users")><i class="bi bi-people-fill" aria-hidden="true"></i> Users</NavLink>
+                </CardHeader>
+                <CardBody>
+                    <CardBlock>
+                        <CardText>
+                            @if (appShowUsers != null)
+                            {
+                                @foreach (var appShowUser in appShowUsers)
+                                {
+                                    <ul>
+                                        <li>@appShowUser.Username</li>
+                                    </ul>
+                                }
+                            }
+                        </CardText>
+                    </CardBlock>
+                </CardBody>
+            </Card>
+        </div>
     </div>
-</div>
 }
 
 @code
 {
-    [Parameter]
-    public string? ShowId { get; set; }
+    [Parameter] public string? ShowId { get; set; }
     private Show? appShow { get; set; }
-    private Platform? appShowPlatform;
+    private ICollection<Platform> appShowPlatforms = new List<Platform>();
+    private ICollection<User> appShowUsers = new List<User>();
     protected override async Task OnInitializedAsync()
     {
         await LoadDataAsync();
@@ -60,10 +91,25 @@
         appShow = await context.Shows!.FirstOrDefaultAsync(c => c.ShowId.ToString() == ShowId);
         if (appShow != null)
         {
-            var platformShow = await context.PlatformShows!.FirstOrDefaultAsync(c => c.ShowId == appShow.ShowId);
-            appShowPlatform = await context.Platforms!.FirstOrDefaultAsync(c => c.PlatformId == platformShow.PlatformId);
+            var showPlatforms = await context.PlatformShows!.Where(c => c.ShowId == appShow.ShowId).ToListAsync();
+
+            foreach (var showPlatform in showPlatforms)
+            {
+                var platform = await context.Platforms!.FirstOrDefaultAsync(c => c.PlatformId == showPlatform.PlatformId);
+                if (platform != null) appShowPlatforms.Add(platform);
+
+            }
+
+            var showUsers = await context.UserShows!.Where(c => c.ShowId == appShow.ShowId).ToListAsync();
+
+            foreach (var showUser in showUsers)
+            {
+                var user = await context.Users!.FirstOrDefaultAsync(c => c.UserId == showUser.UserId);
+                if (user != null) appShowUsers.Add(user);
+
+            }
+
         }
 
     }
-
 }

@@ -35,11 +35,14 @@
             <CardBody>
                 <CardBlock>
                     <CardText>
-                        @foreach (var appPlatformShow in appPlatformShows)
+                        @if (appPlatformShows != null)
                             {
-                                <ul>
-                                    <li>@appPlatformShow.Title</li>
-                                </ul>
+                                @foreach (var appPlatformShow in appPlatformShows)
+                                {
+                                    <ul>
+                                        <li>@appPlatformShow.Title</li>
+                                    </ul>
+                                }
                             }
                         </CardText>
                     </CardBlock>
@@ -56,11 +59,14 @@
                 <CardBody>
                     <CardBlock>
                         <CardText>
-                            @foreach (var appPlatformUser in appPlatformUsers)
+                            @if (appPlatformUsers != null)
                             {
-                                <ul>
-                                    <li>@appPlatformUser.Username</li>
-                                </ul>
+                                @foreach (var appPlatformUser in appPlatformUsers)
+                                {
+                                    <ul>
+                                        <li>@appPlatformUser.Username</li>
+                                    </ul>
+                                }
                             }
                         </CardText>
                     </CardBlock>
@@ -72,11 +78,10 @@
 
 @code
 {
-    [Parameter]
-    public string? PlatformId { get; set; }
+    [Parameter] public string? PlatformId { get; set; }
     private Platform? appPlatform { get; set; }
-    private ICollection<User>? appPlatformUsers = new List<User>();
-    private ICollection<Show>? appPlatformShows = new List<Show>();
+    private ICollection<User> appPlatformUsers = new List<User>();
+    private ICollection<Show> appPlatformShows = new List<Show>();
     protected override async Task OnInitializedAsync()
     {
         await LoadDataAsync();
@@ -94,7 +99,7 @@
             foreach (var platformUser in platformUsers)
             {
                 var user = await context.Users!.FirstOrDefaultAsync(c => c.UserId == platformUser.UserId);
-                appPlatformUsers.Add(user);
+                if (user != null) appPlatformUsers.Add(user);
             }
 
             var platformShows = await context.PlatformShows!.Where(c => c.PlatformId == appPlatform.PlatformId).ToListAsync();
@@ -102,7 +107,7 @@
             foreach (var platformShow in platformShows)
             {
                 var show = await context.Shows!.FirstOrDefaultAsync(c => c.ShowId == platformShow.ShowId);
-                appPlatformShows.Add(show);
+                if (show != null) appPlatformShows.Add(show);
             }
         }
     }

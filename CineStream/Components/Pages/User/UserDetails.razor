@@ -34,11 +34,14 @@
             <CardBody>
                 <CardBlock>
                     <CardText>
-                        @foreach (var appUserShow in appUserShows)
+                        @if (appUserShows != null)
                             {
-                                <ul>
-                                    <li>@appUserShow.Title</li>
-                                </ul>
+                                @foreach (var appUserShow in appUserShows)
+                                {
+                                    <ul>
+                                        <li>@appUserShow?.Title</li>
+                                    </ul>
+                                }
                             }
                         </CardText>
                     </CardBlock>
@@ -48,20 +51,23 @@
         <div class="clr-col-lg-6 clr-col-12">
             <Card>
                 <CardHeader>
-                    <i class="bi bi-tv-fill" aria-hidden="true"></i> Platforms
-                </CardHeader>
-                <CardBody>
+                    <NavLink href=@($"platforms")><i class="bi bi-tv-fill" aria-hidden="true"></i> Platforms</NavLink>
+    </CardHeader>
+                    <CardBody>
                     <CardBlock>
                         <CardText>
-                            @foreach (var appUserPlatform in appUserPlatforms)
-                            {
-                                <ul>
-                                    <li>@appUserPlatform.Name</li>
-                                </ul>
-                            }
-                        </CardText>
-                    </CardBlock>
-                </CardBody>
+                            @if (appUserPlatforms != null)
+                {
+                    @foreach (var appUserPlatform in appUserPlatforms)
+                    {
+                                        <ul>
+                                            <li>@appUserPlatform?.Name</li>
+                                        </ul>
+                    }
+                }
+                            </CardText>
+                        </CardBlock>
+                    </CardBody>
             </Card>
         </div>
     </div>
@@ -69,11 +75,11 @@
 
 @code
 {
-    [Parameter]
-    public string? UserId { get; set; }
+    [Parameter] public string? UserId { get; set; }
     private User? appUser { get; set; }
-    private ICollection<Platform>? appUserPlatforms = new List<Platform>();
-    private ICollection<Show>? appUserShows = new List<Show>();
+    private ICollection<Platform> appUserPlatforms = new List<Platform>();
+    private ICollection<Show> appUserShows = new List<Show>();
+
     protected override async Task OnInitializedAsync()
     {
         await LoadDataAsync();
@@ -81,7 +87,7 @@
 
     private async Task LoadDataAsync()
     {
-        using var context = DbFactory.CreateDbContext();
+        using var context = await DbFactory.CreateDbContextAsync();
 
         appUser = await context.Users!.FirstOrDefaultAsync(c => c.UserId.ToString() == UserId);
         if (appUser != null)
@@ -91,7 +97,8 @@
             foreach (var platformUser in platformUsers)
             {
                 var platform = await context.Platforms!.FirstOrDefaultAsync(c => c.PlatformId == platformUser.PlatformId);
-                appUserPlatforms.Add(platform);
+                if (platform != null) appUserPlatforms.Add(platform);
+
             }
 
             var showUsers = await context.UserShows!.Where(c => c.UserId == appUser.UserId).ToListAsync();
@@ -99,9 +106,8 @@
             foreach (var showUser in showUsers)
             {
                 var show = await context.Shows!.FirstOrDefaultAsync(c => c.ShowId == showUser.ShowId);
-                appUserShows.Add(show);
+                if (show != null) appUserShows.Add(show);
             }
         }
     }
-
 }
