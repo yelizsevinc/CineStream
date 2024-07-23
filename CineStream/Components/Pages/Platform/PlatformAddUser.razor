@@ -1,0 +1,79 @@
+@page "/platforms/{PlatformId}/add-user"
+@using Microsoft.EntityFrameworkCore
+@using CineStream.Data
+
+@inject IDbContextFactory<CineStreamContext> DbFactory
+
+@inject NavigationManager NavManager
+
+<PageTitle>Add User</PageTitle>
+
+<h1><i class="bi bi-plus-circle-fill" aria-hidden="true"></i> Add User</h1>
+
+<div class="clr-row">
+    <div class="clr-col-lg-6 clr-col-12">
+        <Card>
+            <CardBody>
+                <CardBlock>
+                    <Form Model="selectedUser" OnValidSubmit="HandleValidSubmit" Layout="FormLayout.Vertical">
+                        <DataAnnotationsValidator />
+
+                        <InputCombobox Label="Select Value" TItem="User" Items="@AppUsers"
+                            @bind-SelectedItem="selectedUser" ItemToText="o => o?.Username"
+                            ValidationFor="() => selectedUser" HelpText="A value selection is required.">
+                            <ItemTemplate Context="selectedUser">
+                                @selectedUser.Username
+                            </ItemTemplate>
+                        </InputCombobox>
+
+                        <Button class="mt-3" Variant="Primary" type="submit">Submit</Button>
+                    </Form>
+                </CardBlock>
+            </CardBody>
+        </Card>
+    </div>
+</div>
+
+@code {
+    [Parameter] public string? PlatformId { get; set; }
+    private User selectedUser = new User();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadDataAsync();
+    }
+
+    private ICollection<User>? AppUsers { get; set; }
+
+    // Get all users that are not already associated with the platform
+    private async Task LoadDataAsync()
+    {
+        ICollection<User> appPlatformUsers = new List<User>();
+
+        using var context = DbFactory.CreateDbContext();
+
+        var allUsers = await context.Users!.ToListAsync();
+        var platformUsers = await context.PlatformUsers!.Where(c => c.PlatformId.ToString() == PlatformId).ToListAsync();
+
+        foreach (var platformUser in platformUsers)
+        {
+            var user = await context.Users!.FirstOrDefaultAsync(c => c.UserId == platformUser.UserId);
+            if (user != null) appPlatformUsers.Add(user);
+        }
+
+        AppUsers = allUsers.Except(appPlatformUsers).ToList();
+
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        using var context = await DbFactory.CreateDbContextAsync();
+        PlatformUser platformUser = new PlatformUser();
+        platformUser.PlatformId = int.Parse(PlatformId);
+        platformUser.UserId = selectedUser.UserId;
+        platformUser.SubscriptionDate = DateTime.Now;
+        context.PlatformUsers?.Add(platformUser);
+        await context.SaveChangesAsync();
+        NavManager.NavigateTo("/platforms/" + PlatformId);
+    }
+}
