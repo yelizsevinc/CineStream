@@ -1,0 +1,79 @@
+@page "/shows/{ShowId}/add-platform"
+@using Microsoft.EntityFrameworkCore
+@using CineStream.Data
+
+@inject IDbContextFactory<CineStreamContext> DbFactory
+
+@inject NavigationManager NavManager
+
+<PageTitle>Add Platform</PageTitle>
+
+<h1><i class="bi bi-plus-circle-fill" aria-hidden="true"></i> Add Platform</h1>
+
+<div class="clr-row">
+    <div class="clr-col-lg-6 clr-col-12">
+        <Card>
+            <CardBody>
+                <CardBlock>
+                    <Form Model="selectedPlatform" OnValidSubmit="HandleValidSubmit" Layout="FormLayout.Vertical">
+                        <DataAnnotationsValidator />
+
+                        <InputCombobox Label="Select Value" TItem="Platform" Items="@AppPlatforms"
+                            @bind-SelectedItem="selectedPlatform" ItemToText="o => o?.Name"
+                            ValidationFor="() => selectedPlatform" HelpText="A value selection is required.">
+                            <ItemTemplate Context="selectedPlatform">
+                                @selectedPlatform.Name
+                            </ItemTemplate>
+                        </InputCombobox>
+
+                        <Button class="mt-3" Variant="Primary" type="submit">Submit</Button>
+                    </Form>
+                </CardBlock>
+            </CardBody>
+        </Card>
+    </div>
+</div>
+
+@code {
+    [Parameter] public string? ShowId { get; set; }
+    private Platform selectedPlatform = new Platform();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadDataAsync();
+    }
+
+    private ICollection<Platform>? AppPlatforms { get; set; }
+
+    // Get all platforms that are not already associated with the show
+    private async Task LoadDataAsync()
+    {
+        ICollection<Platform> appShowPlatforms = new List<Platform>();
+
+        using var context = DbFactory.CreateDbContext();
+
+        var allPlatforms = await context.Platforms!.ToListAsync();
+        var showPlatforms = await context.PlatformShows!.Where(c => c.ShowId.ToString() == ShowId).ToListAsync();
+
+        foreach (var showPlatform in showPlatforms)
+        {
+            var platform = await context.Platforms!.FirstOrDefaultAsync(c => c.PlatformId == showPlatform.PlatformId);
+            if (platform != null) appShowPlatforms.Add(platform);
+        }
+
+        AppPlatforms = allPlatforms.Except(appShowPlatforms).ToList();
+
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        using var context = await DbFactory.CreateDbContextAsync();
+        PlatformShow showPlatform = new PlatformShow();
+        showPlatform.PlatformId = selectedPlatform.PlatformId;
+        showPlatform.ShowId = int.Parse(ShowId);
+        showPlatform.AddedToPlatformDate = DateTime.Now;
+        context.PlatformShows?.Add(showPlatform);
+        await context.SaveChangesAsync();
+        NavManager.NavigateTo("/shows/" + ShowId);
+    }
+}
