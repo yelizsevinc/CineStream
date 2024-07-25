@@ -1,0 +1,79 @@
+@page "/users/{UserId}/add-show"
+@using Microsoft.EntityFrameworkCore
+@using CineStream.Data
+
+@inject IDbContextFactory<CineStreamContext> DbFactory
+
+@inject NavigationManager NavManager
+
+<PageTitle>Add Show</PageTitle>
+
+<h1><i class="bi bi-plus-circle-fill" aria-hidden="true"></i> Add Show</h1>
+
+<div class="clr-row">
+    <div class="clr-col-lg-6 clr-col-12">
+        <Card>
+            <CardBody>
+                <CardBlock>
+                    <Form Model="selectedShow" OnValidSubmit="HandleValidSubmit" Layout="FormLayout.Vertical">
+                        <DataAnnotationsValidator />
+
+                        <InputCombobox Label="Select Value" TItem="Show" Items="@AppShows"
+                            @bind-SelectedItem="selectedShow" ItemToText="o => o?.Title"
+                            ValidationFor="() => selectedShow" HelpText="A value selection is required.">
+                            <ItemTemplate Context="selectedShow">
+                                @selectedShow.Title
+                            </ItemTemplate>
+                        </InputCombobox>
+
+                        <Button class="mt-3" Variant="Primary" type="submit">Submit</Button>
+                    </Form>
+                </CardBlock>
+            </CardBody>
+        </Card>
+    </div>
+</div>
+
+@code {
+    [Parameter] public string? UserId { get; set; }
+    private Show selectedShow = new Show();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadDataAsync();
+    }
+
+    private ICollection<Show>? AppShows { get; set; }
+
+    // Get all shows that are not already associated with the user
+    private async Task LoadDataAsync()
+    {
+        ICollection<Show> appUserShows = new List<Show>();
+
+        using var context = DbFactory.CreateDbContext();
+
+        var allShows = await context.Shows!.ToListAsync();
+        var userShows = await context.UserShows!.Where(c => c.UserId.ToString() == UserId).ToListAsync();
+
+        foreach (var userShow in userShows)
+        {
+            var show = await context.Shows!.FirstOrDefaultAsync(c => c.ShowId == userShow.ShowId);
+            if (show != null) appUserShows.Add(show);
+        }
+
+        AppShows = allShows.Except(appUserShows).ToList();
+
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        using var context = await DbFactory.CreateDbContextAsync();
+        UserShow userShow = new UserShow();
+        userShow.ShowId = selectedShow.ShowId;
+        userShow.UserId = int.Parse(UserId);
+        userShow.CreatedAt = DateTime.Now;
+        context.UserShows?.Add(userShow);
+        await context.SaveChangesAsync();
+        NavManager.NavigateTo("/users/" + UserId);
+    }
+}
