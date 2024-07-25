@@ -70,7 +70,7 @@
         using var context = await DbFactory.CreateDbContextAsync();
         UserShow showUser = new UserShow();
         showUser.UserId = selectedUser.UserId;
-        showUser.ShowId = int.Parse(ShowId);
+        showUser.ShowId = int.Parse(ShowId ?? "0");
         showUser.CreatedAt = DateTime.Now;
         context.UserShows?.Add(showUser);
         await context.SaveChangesAsync();

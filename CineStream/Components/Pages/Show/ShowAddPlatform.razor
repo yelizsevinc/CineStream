@@ -70,7 +70,7 @@
         using var context = await DbFactory.CreateDbContextAsync();
         PlatformShow showPlatform = new PlatformShow();
         showPlatform.PlatformId = selectedPlatform.PlatformId;
-        showPlatform.ShowId = int.Parse(ShowId);
+        showPlatform.ShowId = int.Parse(ShowId ?? "0");
         showPlatform.AddedToPlatformDate = DateTime.Now;
         context.PlatformShows?.Add(showPlatform);
         await context.SaveChangesAsync();
