@@ -3,7 +3,6 @@
 @using CineStream.Data
 
 @inject IDbContextFactory<CineStreamContext> DbFactory
-
 @inject NavigationManager NavManager
 
 <PageTitle>Add Show</PageTitle>
@@ -18,11 +17,11 @@
                     <Form Model="selectedShow" OnValidSubmit="HandleValidSubmit" Layout="FormLayout.Vertical">
                         <DataAnnotationsValidator />
 
-                        <InputCombobox Label="Select Value" TItem="Show" Items="@AppShows"
+                        <InputCombobox Label="Select Show" TItem="Show" Items="@availableShows"
                             @bind-SelectedItem="selectedShow" ItemToText="o => o?.Title"
-                            ValidationFor="() => selectedShow" HelpText="A value selection is required.">
-                            <ItemTemplate Context="selectedShow">
-                                @selectedShow.Title
+                            ValidationFor="() => selectedShow" HelpText="Please select a show.">
+                            <ItemTemplate Context="show">
+                                @show.Title
                             </ItemTemplate>
                         </InputCombobox>
 
@@ -36,44 +35,52 @@
 
 @code {
     [Parameter] public string? PlatformId { get; set; }
+    private ICollection<Show>? availableShows { get; set; }
     private Show selectedShow = new Show();
 
     protected override async Task OnInitializedAsync()
     {
-        await LoadDataAsync();
+        await LoadAvailableShowsAsync();
     }
 
-    private ICollection<Show>? AppShows { get; set; }
-
-    // Get all shows that are not already associated with the platform
-    private async Task LoadDataAsync()
+    private async Task LoadAvailableShowsAsync()
     {
-        ICollection<Show> appPlatformShows = new List<Show>();
-
-        using var context = DbFactory.CreateDbContext();
-
-        var allShows = await context.Shows!.ToListAsync();
-        var platformShows = await context.PlatformShows!.Where(c => c.PlatformId.ToString() == PlatformId).ToListAsync();
-
-        foreach (var platformShow in platformShows)
+        try
         {
-            var show = await context.Shows!.FirstOrDefaultAsync(c => c.ShowId == platformShow.ShowId);
-            if (show != null) appPlatformShows.Add(show);
+            using var context = await DbFactory.CreateDbContextAsync();
+            var allShows = await context.Shows!.ToListAsync();
+            var platformShows = await context.PlatformShows!
+            .Where(ps => ps.PlatformId.ToString() == PlatformId)
+            .Select(ps => ps.ShowId)
+            .ToListAsync();
+
+            availableShows = allShows.Where(show => !platformShows.Contains(show.ShowId)).ToList();
         }
-
-        AppShows = allShows.Except(appPlatformShows).ToList();
-
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error loading shows: {ex.Message}");
+        }
     }
 
     private async Task HandleValidSubmit()
     {
-        using var context = await DbFactory.CreateDbContextAsync();
-        PlatformShow platformShow = new PlatformShow();
-        platformShow.PlatformId = int.Parse(PlatformId ?? "0");
-        platformShow.ShowId = selectedShow.ShowId;
-        platformShow.AddedToPlatformDate = DateTime.Now;
-        context.PlatformShows?.Add(platformShow);
-        await context.SaveChangesAsync();
-        NavManager.NavigateTo("/platforms/" + PlatformId);
+        try
+        {
+            using var context = await DbFactory.CreateDbContextAsync();
+            var platformShow = new PlatformShow
+                {
+                    PlatformId = int.Parse(PlatformId ?? "0"),
+                    ShowId = selectedShow.ShowId,
+                    AddedToPlatformDate = DateTime.Now
+                };
+
+            context.PlatformShows?.Add(platformShow);
+            await context.SaveChangesAsync();
+            NavManager.NavigateTo($"/platforms/{PlatformId}");
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error adding show to platform: {ex.Message}");
+        }
     }
 }
