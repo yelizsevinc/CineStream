@@ -6,66 +6,79 @@
 
 <PageTitle>Users</PageTitle>
 
-@if ((appPlatform != null) && (appPlatform.Name != null))
+@if (platform != null && platform.Name != null)
 {
-    <h1><i class="bi bi-people-fill" aria-hidden="true"></i> Users of @appPlatform.Name</h1>
+    <h1><i class="bi bi-people-fill" aria-hidden="true"></i> Users of @platform.Name</h1>
 }
 
-@if (appPlatformUsers != null)
+@if (platformUsers != null)
 {
-    <Datagrid Items="AppPlatformUsers">
-    <DatagridColumn Title="UserId" TRowData="AppPlatformUser" Field="c => c.UserId.ToString()" CanSort="true"
+    <Datagrid Items="platformUsers">
+    <DatagridColumn Title="UserId" TRowData="PlatformUserDetails" Field="c => c.UserId.ToString()" CanSort="true"
         CanFilter="true" FilterImmediately="true" />
-    <DatagridColumn Title="Username" TRowData="AppPlatformUser" Field="c => c.Username" CanSort="true" CanFilter="true"
+    <DatagridColumn Title="Username" TRowData="PlatformUserDetails" Field="c => c.Username" CanSort="true"
+        CanFilter="true" FilterImmediately="true" />
+    <DatagridColumn Title="Email" TRowData="PlatformUserDetails" Field="c => c.Email" CanSort="true" CanFilter="true"
         FilterImmediately="true" />
-    <DatagridColumn Title="Email" TRowData="AppPlatformUser" Field="c => c.Email" CanSort="true" CanFilter="true"
-        FilterImmediately="true" />
-    <DatagridColumn Title="SubscriptionDate" TRowData="AppPlatformUser" Field="c => c.SubscriptionDate.ToString()"
+    <DatagridColumn Title="SubscriptionDate" TRowData="PlatformUserDetails" Field="c => c.SubscriptionDate.ToString()"
         CanSort="true" CanFilter="true" FilterImmediately="true" />
 </Datagrid>
 }
 
-@code
-{
-    [Parameter]
-    public string? PlatformId { get; set; }
-    private Platform? appPlatform { get; set; }
-    private ICollection<PlatformUser>? appPlatformUsers { get; set; }
-    private ICollection<AppPlatformUser>? AppPlatformUsers { get; set; }
+@code {
+    [Parameter] public string? PlatformId { get; set; }
+    private Platform? platform { get; set; }
+    private ICollection<PlatformUser>? platformUserEntities { get; set; }
+    private ICollection<PlatformUserDetails>? platformUsers { get; set; }
+
     protected override async Task OnInitializedAsync()
     {
-        await LoadDataAsync();
+        try
+        {
+            using var context = await DbFactory.CreateDbContextAsync();
+            await LoadPlatformDataAsync(context);
+            await LoadPlatformUsersAsync(context);
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error loading platform data: {ex.Message}");
+        }
     }
 
-    private async Task LoadDataAsync()
+    private async Task LoadPlatformDataAsync(CineStreamContext context)
     {
-        using var context = DbFactory.CreateDbContext();
+        platform = await context.Platforms!.FirstOrDefaultAsync(c => c.PlatformId.ToString() == PlatformId);
+    }
 
-        AppPlatformUsers = new List<AppPlatformUser>();
-        appPlatform = await context.Platforms!.FirstOrDefaultAsync(c => c.PlatformId.ToString() == PlatformId);
+    private async Task LoadPlatformUsersAsync(CineStreamContext context)
+    {
+        if (platform == null) return;
 
-        var allPlatformUsers = await context.PlatformUsers!.ToListAsync();
-        var platformUsers = allPlatformUsers.Where(c => c.PlatformId.ToString() == PlatformId).ToList();
-        var allUsers = await context.Users!.ToListAsync();
-        appPlatformUsers = platformUsers.Where(c => c.PlatformId.ToString() == PlatformId).ToList();
+        platformUsers = new List<PlatformUserDetails>();
+        platformUserEntities = await context.PlatformUsers!.Where(c => c.PlatformId.ToString() == PlatformId).ToListAsync();
 
-
-        foreach (var platformUser in appPlatformUsers)
+        foreach (var platformUser in platformUserEntities)
         {
             var user = await context.Users!.FirstOrDefaultAsync(u => u.UserId == platformUser.UserId);
             if (user != null)
             {
-                var appPlatformUser = new AppPlatformUser
+                var platformUserDetails = new PlatformUserDetails
                     {
                         UserId = user.UserId,
                         Username = user.Username,
                         Email = user.Email,
                         SubscriptionDate = platformUser.SubscriptionDate
                     };
-                AppPlatformUsers.Add(appPlatformUser);
+                platformUsers.Add(platformUserDetails);
             }
         }
-
     }
 
+    private class PlatformUserDetails
+    {
+        public int UserId { get; set; }
+        public string? Username { get; set; }
+        public string? Email { get; set; }
+        public DateTime? SubscriptionDate { get; set; }
+    }
 }

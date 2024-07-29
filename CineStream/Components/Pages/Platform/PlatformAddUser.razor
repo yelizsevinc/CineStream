@@ -3,7 +3,6 @@
 @using CineStream.Data
 
 @inject IDbContextFactory<CineStreamContext> DbFactory
-
 @inject NavigationManager NavManager
 
 <PageTitle>Add User</PageTitle>
@@ -18,11 +17,11 @@
                     <Form Model="selectedUser" OnValidSubmit="HandleValidSubmit" Layout="FormLayout.Vertical">
                         <DataAnnotationsValidator />
 
-                        <InputCombobox Label="Select Value" TItem="User" Items="@AppUsers"
+                        <InputCombobox Label="Select User" TItem="User" Items="@availableUsers"
                             @bind-SelectedItem="selectedUser" ItemToText="o => o?.Username"
-                            ValidationFor="() => selectedUser" HelpText="A value selection is required.">
-                            <ItemTemplate Context="selectedUser">
-                                @selectedUser.Username
+                            ValidationFor="() => selectedUser" HelpText="Please select a user.">
+                            <ItemTemplate Context="user">
+                                @user.Username
                             </ItemTemplate>
                         </InputCombobox>
 
@@ -36,44 +35,52 @@
 
 @code {
     [Parameter] public string? PlatformId { get; set; }
+    private ICollection<User>? availableUsers { get; set; }
     private User selectedUser = new User();
 
     protected override async Task OnInitializedAsync()
     {
-        await LoadDataAsync();
+        await LoadAvailableUsersAsync();
     }
 
-    private ICollection<User>? AppUsers { get; set; }
-
-    // Get all users that are not already associated with the platform
-    private async Task LoadDataAsync()
+    private async Task LoadAvailableUsersAsync()
     {
-        ICollection<User> appPlatformUsers = new List<User>();
-
-        using var context = DbFactory.CreateDbContext();
-
-        var allUsers = await context.Users!.ToListAsync();
-        var platformUsers = await context.PlatformUsers!.Where(c => c.PlatformId.ToString() == PlatformId).ToListAsync();
-
-        foreach (var platformUser in platformUsers)
+        try
         {
-            var user = await context.Users!.FirstOrDefaultAsync(c => c.UserId == platformUser.UserId);
-            if (user != null) appPlatformUsers.Add(user);
+            using var context = await DbFactory.CreateDbContextAsync();
+            var allUsers = await context.Users!.ToListAsync();
+            var platformUsers = await context.PlatformUsers!
+            .Where(pu => pu.PlatformId.ToString() == PlatformId)
+            .Select(pu => pu.UserId)
+            .ToListAsync();
+
+            availableUsers = allUsers.Where(user => !platformUsers.Contains(user.UserId)).ToList();
         }
-
-        AppUsers = allUsers.Except(appPlatformUsers).ToList();
-
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error loading users: {ex.Message}");
+        }
     }
 
     private async Task HandleValidSubmit()
     {
-        using var context = await DbFactory.CreateDbContextAsync();
-        PlatformUser platformUser = new PlatformUser();
-        platformUser.PlatformId = int.Parse(PlatformId ?? "0");
-        platformUser.UserId = selectedUser.UserId;
-        platformUser.SubscriptionDate = DateTime.Now;
-        context.PlatformUsers?.Add(platformUser);
-        await context.SaveChangesAsync();
-        NavManager.NavigateTo("/platforms/" + PlatformId);
+        try
+        {
+            using var context = await DbFactory.CreateDbContextAsync();
+            var platformUser = new PlatformUser
+                {
+                    PlatformId = int.Parse(PlatformId ?? "0"),
+                    UserId = selectedUser.UserId,
+                    SubscriptionDate = DateTime.Now
+                };
+
+            context.PlatformUsers?.Add(platformUser);
+            await context.SaveChangesAsync();
+            NavManager.NavigateTo($"/platforms/{PlatformId}");
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error adding user to platform: {ex.Message}");
+        }
     }
 }

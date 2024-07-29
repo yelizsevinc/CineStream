@@ -6,9 +6,9 @@
 
 <PageTitle>Platform</PageTitle>
 
-@if ((appPlatform != null) && (appPlatform.Name != null) && (appPlatform.Details != null))
+@if (platform != null && platform.Name != null)
 {
-    <h1><i class="bi bi-tv-fill" aria-hidden="true"></i> @appPlatform.Name</h1>
+    <h1><i class="bi bi-tv-fill" aria-hidden="true"></i> @platform.Name</h1>
 
     <div class="clr-row">
     <div class="clr-col-12">
@@ -19,28 +19,31 @@
             <CardBody>
                 <CardBlock>
                     <CardText>
-                        @appPlatform.Details
-                    </CardText>
-                </CardBlock>
-            </CardBody>
-        </Card>
-    </div>
-    <div class="clr-col-lg-6 clr-col-12">
-        <Card>
-            <CardHeader>
-                <NavLink href=@($"platforms/{PlatformId}/shows")><i class="bi bi-camera-reels-fill"
-                        aria-hidden="true"></i>
-                    Shows</NavLink>
-            </CardHeader>
-            <CardBody>
-                <CardBlock>
-                    <CardText>
-                        @if (appPlatformShows != null)
+                        @if (platform.Details != null)
                             {
-                                @foreach (var appPlatformShow in appPlatformShows)
+                                @platform.Details
+                            }
+                        </CardText>
+                    </CardBlock>
+                </CardBody>
+            </Card>
+        </div>
+        <div class="clr-col-lg-6 clr-col-12">
+            <Card>
+                <CardHeader>
+                    <NavLink href=@($"platforms/{PlatformId}/shows")><i class="bi bi-camera-reels-fill"
+                            aria-hidden="true"></i>
+                        Shows</NavLink>
+                </CardHeader>
+                <CardBody>
+                    <CardBlock>
+                        <CardText>
+                            @if (platformShows != null)
+                            {
+                                @foreach (var show in platformShows)
                                 {
                                     <ul>
-                                        <li>@appPlatformShow.Title</li>
+                                        <li>@show.Title</li>
                                     </ul>
                                 }
                             }
@@ -66,12 +69,12 @@
                 <CardBody>
                     <CardBlock>
                         <CardText>
-                            @if (appPlatformUsers != null)
+                            @if (platformUsers != null)
                             {
-                                @foreach (var appPlatformUser in appPlatformUsers)
+                                @foreach (var user in platformUsers)
                                 {
                                     <ul>
-                                        <li>@appPlatformUser.Username</li>
+                                        <li>@user.Username</li>
                                     </ul>
                                 }
                             }
@@ -93,37 +96,57 @@
 @code
 {
     [Parameter] public string? PlatformId { get; set; }
-    private Platform? appPlatform { get; set; }
-    private ICollection<User> appPlatformUsers = new List<User>();
-    private ICollection<Show> appPlatformShows = new List<Show>();
+    private Platform? platform { get; set; }
+    private ICollection<User> platformUsers = new List<User>();
+    private ICollection<Show> platformShows = new List<Show>();
+
     protected override async Task OnInitializedAsync()
     {
-        await LoadDataAsync();
-    }
-
-    private async Task LoadDataAsync()
-    {
-        using var context = DbFactory.CreateDbContext();
-
-        appPlatform = await context.Platforms!.FirstOrDefaultAsync(c => c.PlatformId.ToString() == PlatformId);
-        if (appPlatform != null)
+        try
         {
-            var platformUsers = await context.PlatformUsers!.Where(c => c.PlatformId == appPlatform.PlatformId).ToListAsync();
-
-            foreach (var platformUser in platformUsers)
-            {
-                var user = await context.Users!.FirstOrDefaultAsync(c => c.UserId == platformUser.UserId);
-                if (user != null) appPlatformUsers.Add(user);
-            }
-
-            var platformShows = await context.PlatformShows!.Where(c => c.PlatformId == appPlatform.PlatformId).ToListAsync();
-
-            foreach (var platformShow in platformShows)
-            {
-                var show = await context.Shows!.FirstOrDefaultAsync(c => c.ShowId == platformShow.ShowId);
-                if (show != null) appPlatformShows.Add(show);
-            }
+            using var context = await DbFactory.CreateDbContextAsync();
+            await LoadPlatformDetailsAsync(context);
+            await LoadPlatformShowsAsync(context);
+            await LoadPlatformUsersAsync(context);
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error loading platform data: {ex.Message}");
         }
     }
 
+    private async Task LoadPlatformDetailsAsync(CineStreamContext context)
+    {
+        platform = await context.Platforms!.FirstOrDefaultAsync(c => c.PlatformId.ToString() == PlatformId);
+    }
+
+    private async Task LoadPlatformUsersAsync(CineStreamContext context)
+    {
+        if (platform == null) return;
+
+        var platformUsersList = await context.PlatformUsers!
+        .Where(c => c.PlatformId == platform.PlatformId)
+        .ToListAsync();
+
+        foreach (var platformUser in platformUsersList)
+        {
+            var user = await context.Users!.FirstOrDefaultAsync(c => c.UserId == platformUser.UserId);
+            if (user != null) platformUsers.Add(user);
+        }
+    }
+
+    private async Task LoadPlatformShowsAsync(CineStreamContext context)
+    {
+        if (platform == null) return;
+
+        var platformShowsList = await context.PlatformShows!
+        .Where(c => c.PlatformId == platform.PlatformId)
+        .ToListAsync();
+
+        foreach (var platformShow in platformShowsList)
+        {
+            var show = await context.Shows!.FirstOrDefaultAsync(c => c.ShowId == platformShow.ShowId);
+            if (show != null) platformShows.Add(show);
+        }
+    }
 }

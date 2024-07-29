@@ -3,7 +3,6 @@
 @using CineStream.Data
 
 @inject IDbContextFactory<CineStreamContext> DbFactory
-
 @inject NavigationManager NavManager
 
 <PageTitle>New Platform</PageTitle>
@@ -36,10 +35,17 @@
 
     private async Task HandleValidSubmit()
     {
-        using var context = await DbFactory.CreateDbContextAsync();
-        newPlatform.CreatedAt = DateTime.Now;
-        context.Platforms?.Add(newPlatform);
-        await context.SaveChangesAsync();
-        NavManager.NavigateTo("/platforms");
+        try
+        {
+            using var context = await DbFactory.CreateDbContextAsync();
+            newPlatform.CreatedAt = DateTime.Now;
+            context.Platforms?.Add(newPlatform);
+            await context.SaveChangesAsync();
+            NavManager.NavigateTo("/platforms");
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error creating new platform: {ex.Message}");
+        }
     }
 }

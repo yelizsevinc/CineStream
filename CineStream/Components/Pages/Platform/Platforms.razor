@@ -17,9 +17,9 @@
                     <i class="bi bi-plus-circle-fill" aria-hidden="true"></i> New Platform
                 </Button>
             </NavLink>
-            @if (AppPlatforms != null)
+            @if (platforms != null)
             {
-                <Datagrid Items="AppPlatforms">
+                <Datagrid Items="platforms">
                     <DatagridColumn Title="PlatformId" TRowData="Platform" Field="c => c.PlatformId" CanSort="true"
                         CanFilter="true" FilterImmediately="true" />
                     <DatagridColumn Title="Name" TRowData="Platform" Field="c => c.Name" CanSort="true" CanFilter="true"
@@ -27,16 +27,19 @@
                     <DatagridColumn Title="CreatedAt" TRowData="Platform" Field="c => c.CreatedAt.ToString()" CanSort="true"
                         CanFilter="true" FilterImmediately="true" />
                     <DatagridColumn Title="Users" TRowData="Platform">
-                        <a href="@($"/platforms/{@context?.PlatformId}/users")" class="btn btn-primary"><i
-                                class="bi bi-people-fill" aria-hidden="true"></i> Users</a>
+                        <a href="@($"/platforms/{@context?.PlatformId}/users")" class="btn btn-primary">
+                            <i class="bi bi-people-fill" aria-hidden="true"></i> Users
+                        </a>
                     </DatagridColumn>
                     <DatagridColumn Title="Shows" TRowData="Platform">
-                        <a href="@($"/platforms/{@context?.PlatformId}/shows")" class="btn btn-primary"><i
-                                class="bi bi-camera-reels-fill" aria-hidden="true"></i> Shows</a>
+                        <a href="@($"/platforms/{@context?.PlatformId}/shows")" class="btn btn-primary">
+                            <i class="bi bi-camera-reels-fill" aria-hidden="true"></i> Shows
+                        </a>
                     </DatagridColumn>
                     <DatagridColumn Title="Details" TRowData="Platform">
-                        <a href="@($"/platforms/{@context?.PlatformId}")" class="btn btn-primary"><i class="bi bi-tv-fill"
-                                aria-hidden="true"></i> Details</a>
+                        <a href="@($"/platforms/{@context?.PlatformId}")" class="btn btn-primary">
+                            <i class="bi bi-tv-fill" aria-hidden="true"></i> Details
+                        </a>
                     </DatagridColumn>
                 </Datagrid>
             }
@@ -45,18 +48,23 @@
 </Tabs>
 
 @code {
-    private ICollection<Platform>? AppPlatforms { get; set; }
+    private ICollection<Platform>? platforms { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
-        await LoadDataAsync();
+        await LoadPlatformsAsync();
     }
 
-    private async Task LoadDataAsync()
+    private async Task LoadPlatformsAsync()
     {
-        using var context = DbFactory.CreateDbContext();
-
-        AppPlatforms = await context.Platforms!.ToListAsync();
-
+        try
+        {
+            using var context = await DbFactory.CreateDbContextAsync();
+            platforms = await context.Platforms!.ToListAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error loading platforms: {ex.Message}");
+        }
     }
 }
