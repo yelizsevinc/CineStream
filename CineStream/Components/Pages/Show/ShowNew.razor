@@ -3,7 +3,6 @@
 @using CineStream.Data
 
 @inject IDbContextFactory<CineStreamContext> DbFactory
-
 @inject NavigationManager NavManager
 
 <PageTitle>New Show</PageTitle>
@@ -20,9 +19,9 @@
 
                         <Text @bind-Value="newShow.Title" Label="Title" HelpText="Title"
                             ValidationFor="() => newShow.Title" />
-                        <Textarea @bind-Value="newShow.Details" Label="Details" HelpText="User Details"
+                        <Textarea @bind-Value="newShow.Details" Label="Details" HelpText="Show Details"
                             ValidationFor="() => newShow.Details" />
-                        <Datepicker @bind-Value="newShow.ReleaseDate" Label="ReleaseDate"
+                        <Datepicker @bind-Value="newShow.ReleaseDate" Label="Release Date"
                             HelpText="@($"The selected date is {newShow.ReleaseDate?.ToShortDateString()}")">
                         </Datepicker>
 
@@ -39,10 +38,17 @@
 
     private async Task HandleValidSubmit()
     {
-        using var context = await DbFactory.CreateDbContextAsync();
-        newShow.CreatedAt = DateTime.Now;
-        context.Shows?.Add(newShow);
-        await context.SaveChangesAsync();
-        NavManager.NavigateTo("/shows");
+        try
+        {
+            using var context = await DbFactory.CreateDbContextAsync();
+            newShow.CreatedAt = DateTime.Now;
+            context.Shows?.Add(newShow);
+            await context.SaveChangesAsync();
+            NavManager.NavigateTo("/shows");
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error creating new show: {ex.Message}");
+        }
     }
 }

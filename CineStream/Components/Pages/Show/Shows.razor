@@ -17,9 +17,9 @@
                     <i class="bi bi-plus-circle-fill" aria-hidden="true"></i> New Show
                 </Button>
             </NavLink>
-            @if (AppShows != null)
+            @if (shows != null)
             {
-                <Datagrid Items="AppShows">
+                <Datagrid Items="shows">
                     <DatagridColumn Title="ShowId" TRowData="Show" Field="c => c.ShowId" CanSort="true" CanFilter="true"
                         FilterImmediately="true" />
                     <DatagridColumn Title="Title" TRowData="Show" Field="c => c.Title" CanSort="true" CanFilter="true"
@@ -39,18 +39,23 @@
 </Tabs>
 
 @code {
-    private ICollection<Show>? AppShows { get; set; }
+    private ICollection<Show>? shows;
 
     protected override async Task OnInitializedAsync()
     {
-        await LoadDataAsync();
+        await LoadShowsAsync();
     }
 
-    private async Task LoadDataAsync()
+    private async Task LoadShowsAsync()
     {
-        using var context = DbFactory.CreateDbContext();
-
-        AppShows = await context.Shows!.ToListAsync();
-
+        try
+        {
+            using var context = await DbFactory.CreateDbContextAsync();
+            shows = await context.Shows!.ToListAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error loading shows: {ex.Message}");
+        }
     }
 }

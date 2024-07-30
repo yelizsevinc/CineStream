@@ -3,7 +3,6 @@
 @using CineStream.Data
 
 @inject IDbContextFactory<CineStreamContext> DbFactory
-
 @inject NavigationManager NavManager
 
 <PageTitle>Add User</PageTitle>
@@ -18,11 +17,11 @@
                     <Form Model="selectedUser" OnValidSubmit="HandleValidSubmit" Layout="FormLayout.Vertical">
                         <DataAnnotationsValidator />
 
-                        <InputCombobox Label="Select Value" TItem="User" Items="@AppUsers"
+                        <InputCombobox Label="Select User" TItem="User" Items="@availableUsers"
                             @bind-SelectedItem="selectedUser" ItemToText="o => o?.Username"
-                            ValidationFor="() => selectedUser" HelpText="A value selection is required.">
-                            <ItemTemplate Context="selectedUser">
-                                @selectedUser.Username
+                            ValidationFor="() => selectedUser" HelpText="A user selection is required.">
+                            <ItemTemplate Context="user">
+                                @user.Username
                             </ItemTemplate>
                         </InputCombobox>
 
@@ -36,44 +35,53 @@
 
 @code {
     [Parameter] public string? ShowId { get; set; }
+    private ICollection<User>? availableUsers { get; set; }
     private User selectedUser = new User();
 
     protected override async Task OnInitializedAsync()
     {
-        await LoadDataAsync();
+        await LoadAvailableUsersAsync();
     }
 
-    private ICollection<User>? AppUsers { get; set; }
-
-    // Get all users that are not already associated with the show
-    private async Task LoadDataAsync()
+    private async Task LoadAvailableUsersAsync()
     {
-        ICollection<User> appShowUsers = new List<User>();
-
-        using var context = DbFactory.CreateDbContext();
-
-        var allUsers = await context.Users!.ToListAsync();
-        var showUsers = await context.UserShows!.Where(c => c.ShowId.ToString() == ShowId).ToListAsync();
-
-        foreach (var showUser in showUsers)
+        try
         {
-            var user = await context.Users!.FirstOrDefaultAsync(c => c.UserId == showUser.UserId);
-            if (user != null) appShowUsers.Add(user);
+            using var context = await DbFactory.CreateDbContextAsync();
+            var allUsers = await context.Users!.ToListAsync();
+            var showUsers = await context.UserShows!
+            .Where(c => c.ShowId.ToString() == ShowId)
+            .Select(c => c.UserId)
+            .ToListAsync();
+
+            availableUsers = allUsers
+            .Where(u => !showUsers.Contains(u.UserId))
+            .ToList();
         }
-
-        AppUsers = allUsers.Except(appShowUsers).ToList();
-
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error loading users: {ex.Message}");
+        }
     }
 
     private async Task HandleValidSubmit()
     {
-        using var context = await DbFactory.CreateDbContextAsync();
-        UserShow showUser = new UserShow();
-        showUser.UserId = selectedUser.UserId;
-        showUser.ShowId = int.Parse(ShowId ?? "0");
-        showUser.CreatedAt = DateTime.Now;
-        context.UserShows?.Add(showUser);
-        await context.SaveChangesAsync();
-        NavManager.NavigateTo("/shows/" + ShowId);
+        try
+        {
+            using var context = await DbFactory.CreateDbContextAsync();
+            var showUser = new UserShow
+                {
+                    UserId = selectedUser.UserId,
+                    ShowId = int.Parse(ShowId ?? "0"),
+                    CreatedAt = DateTime.Now
+                };
+            context.UserShows?.Add(showUser);
+            await context.SaveChangesAsync();
+            NavManager.NavigateTo($"/shows/{ShowId}");
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error adding user to show: {ex.Message}");
+        }
     }
 }
