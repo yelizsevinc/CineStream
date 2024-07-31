@@ -6,68 +6,83 @@
 
 <PageTitle>Shows</PageTitle>
 
-@if ((appUser != null) && (appUser.Username != null))
+@if ((user != null) && (user.Username != null))
 {
-    <h1><i class="bi bi-camera-reels-fill" aria-hidden="true"></i> Shows of @appUser.Username</h1>
+    <h1><i class="bi bi-camera-reels-fill" aria-hidden="true"></i> Shows of @user.Username</h1>
 }
 
-@if (AppUserShows != null)
+@if (userShows != null)
 {
-    <Datagrid Items="AppUserShows">
-    <DatagridColumn Title="ShowId" TRowData="AppUserShow" Field="c => c.ShowId.ToString()" CanSort="true"
+    <Datagrid Items="userShows">
+    <DatagridColumn Title="ShowId" TRowData="UserShowDetails" Field="c => c.ShowId.ToString()" CanSort="true"
         CanFilter="true" FilterImmediately="true" />
-    <DatagridColumn Title="Title" TRowData="AppUserShow" Field="c => c.Title" CanSort="true" CanFilter="true"
+    <DatagridColumn Title="Title" TRowData="UserShowDetails" Field="c => c.Title" CanSort="true" CanFilter="true"
         FilterImmediately="true" />
-    <DatagridColumn Title="ReleaseDate" TRowData="AppUserShow" Field="c => c.ReleaseDate.ToString()" CanSort="true"
+    <DatagridColumn Title="ReleaseDate" TRowData="UserShowDetails" Field="c => c.ReleaseDate.ToString()" CanSort="true"
         CanFilter="true" FilterImmediately="true" />
-    <DatagridColumn Title="Watched" TRowData="AppUserShow" Field="c => c.Watched.ToString()" CanSort="true"
+    <DatagridColumn Title="Watched" TRowData="UserShowDetails" Field="c => c.Watched.ToString()" CanSort="true"
         CanFilter="true" FilterImmediately="true" />
-    <DatagridColumn Title="CreatedAt" TRowData="AppUserShow" Field="c => c.CreatedAt.ToString()" CanSort="true"
+    <DatagridColumn Title="CreatedAt" TRowData="UserShowDetails" Field="c => c.CreatedAt.ToString()" CanSort="true"
         CanFilter="true" FilterImmediately="true" />
 </Datagrid>
 }
 
 @code
 {
-    [Parameter]
-    public string? UserId { get; set; }
-    private User? appUser { get; set; }
-    private ICollection<UserShow>? appUserShows { get; set; }
-    private ICollection<AppUserShow>? AppUserShows { get; set; }
+    [Parameter] public string? UserId { get; set; }
+    private User? user { get; set; }
+    private ICollection<UserShow>? userShowEntities { get; set; }
+    private ICollection<UserShowDetails>? userShows { get; set; }
+
     protected override async Task OnInitializedAsync()
     {
-        await LoadDataAsync();
+        try
+        {
+            using var context = await DbFactory.CreateDbContextAsync();
+            await LoadUserDataAsync(context);
+            await LoadUserShowsAsync(context);
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error loading user data: {ex.Message}");
+        }
     }
 
-    private async Task LoadDataAsync()
+    private async Task LoadUserDataAsync(CineStreamContext context)
     {
-        using var context = DbFactory.CreateDbContext();
+        user = await context.Users!.FirstOrDefaultAsync(c => c.UserId.ToString() == UserId);
+    }
 
-        AppUserShows = new List<AppUserShow>();
-        appUser = await context.Users!.FirstOrDefaultAsync(c => c.UserId.ToString() == UserId);
+    private async Task LoadUserShowsAsync(CineStreamContext context)
+    {
+        if (user == null) return;
 
-        var allUserShows = await context.UserShows!.ToListAsync();
-        var userShows = allUserShows.Where(c => c.UserId.ToString() == UserId).ToList();
-        var allShows = await context.Shows!.ToListAsync();
-        appUserShows = allUserShows.Where(c => c.UserId.ToString() == UserId).ToList();
+        userShows = new List<UserShowDetails>();
+        userShowEntities = await context.UserShows!.Where(c => c.UserId.ToString() == UserId).ToListAsync();
 
-
-        foreach (var userShow in appUserShows)
+        foreach (var userShow in userShowEntities)
         {
-            var Show = await context.Shows!.FirstOrDefaultAsync(u => u.ShowId == userShow.ShowId);
-            if (Show != null)
+            var show = await context.Shows!.FirstOrDefaultAsync(u => u.ShowId == userShow.ShowId);
+            if (show != null)
             {
-                var appUserShow = new AppUserShow
+                var userShowDetails = new UserShowDetails
                     {
-                        ShowId = Show.ShowId,
-                        Title = Show.Title,
-                        ReleaseDate = Show.ReleaseDate,
-                        Watched = userShow.Watched,
-                        CreatedAt = userShow.CreatedAt
+                        ShowId = show.ShowId,
+                        Title = show.Title,
+                        ReleaseDate = show.ReleaseDate,
+                        CreatedAt = show.CreatedAt,
                     };
-                AppUserShows.Add(appUserShow);
+                userShows.Add(userShowDetails);
             }
         }
+    }
 
+    private class UserShowDetails
+    {
+        public int ShowId { get; set; }
+        public string? Title { get; set; }
+        public DateTime? ReleaseDate { get; set; }
+        public bool? Watched { get; set; }
+        public DateTime? CreatedAt { get; set; }
     }
 }

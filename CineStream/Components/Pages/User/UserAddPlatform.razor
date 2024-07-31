@@ -3,7 +3,6 @@
 @using CineStream.Data
 
 @inject IDbContextFactory<CineStreamContext> DbFactory
-
 @inject NavigationManager NavManager
 
 <PageTitle>Add Platform</PageTitle>
@@ -18,11 +17,11 @@
                     <Form Model="selectedPlatform" OnValidSubmit="HandleValidSubmit" Layout="FormLayout.Vertical">
                         <DataAnnotationsValidator />
 
-                        <InputCombobox Label="Select Value" TItem="Platform" Items="@AppPlatforms"
+                        <InputCombobox Label="Select Platform" TItem="Platform" Items="@availablePlatforms"
                             @bind-SelectedItem="selectedPlatform" ItemToText="o => o?.Name"
-                            ValidationFor="() => selectedPlatform" HelpText="A value selection is required.">
-                            <ItemTemplate Context="selectedPlatform">
-                                @selectedPlatform.Name
+                            ValidationFor="() => selectedPlatform" HelpText="A platform selection is required.">
+                            <ItemTemplate Context="platform">
+                                @platform.Name
                             </ItemTemplate>
                         </InputCombobox>
 
@@ -36,44 +35,53 @@
 
 @code {
     [Parameter] public string? UserId { get; set; }
+    private ICollection<Platform>? availablePlatforms { get; set; }
     private Platform selectedPlatform = new Platform();
 
     protected override async Task OnInitializedAsync()
     {
-        await LoadDataAsync();
+        await LoadAvailablePlatformsAsync();
     }
 
-    private ICollection<Platform>? AppPlatforms { get; set; }
-
-    // Get all platforms that are not already associated with the user
-    private async Task LoadDataAsync()
+    private async Task LoadAvailablePlatformsAsync()
     {
-        ICollection<Platform> appUserPlatforms = new List<Platform>();
-
-        using var context = DbFactory.CreateDbContext();
-
-        var allPlatforms = await context.Platforms!.ToListAsync();
-        var userPlatforms = await context.PlatformUsers!.Where(c => c.UserId.ToString() == UserId).ToListAsync();
-
-        foreach (var userPlatform in userPlatforms)
+        try
         {
-            var platform = await context.Platforms!.FirstOrDefaultAsync(c => c.PlatformId == userPlatform.PlatformId);
-            if (platform != null) appUserPlatforms.Add(platform);
+            using var context = await DbFactory.CreateDbContextAsync();
+            var allPlatforms = await context.Platforms!.ToListAsync();
+            var userPlatforms = await context.PlatformUsers!
+            .Where(c => c.UserId.ToString() == UserId)
+            .Select(c => c.PlatformId)
+            .ToListAsync();
+
+            availablePlatforms = allPlatforms
+            .Where(p => !userPlatforms.Contains(p.PlatformId))
+            .ToList();
         }
-
-        AppPlatforms = allPlatforms.Except(appUserPlatforms).ToList();
-
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error loading platforms: {ex.Message}");
+        }
     }
 
     private async Task HandleValidSubmit()
     {
-        using var context = await DbFactory.CreateDbContextAsync();
-        PlatformUser userPlatform = new PlatformUser();
-        userPlatform.PlatformId = selectedPlatform.PlatformId;
-        userPlatform.UserId = int.Parse(UserId ?? "0");
-        userPlatform.SubscriptionDate = DateTime.Now;
-        context.PlatformUsers?.Add(userPlatform);
-        await context.SaveChangesAsync();
-        NavManager.NavigateTo("/users/" + UserId);
+        try
+        {
+            using var context = await DbFactory.CreateDbContextAsync();
+            var userPlatform = new PlatformUser
+                {
+                    PlatformId = selectedPlatform.PlatformId,
+                    UserId = int.Parse(UserId ?? "0"),
+                    SubscriptionDate = DateTime.Now
+                };
+            context.PlatformUsers?.Add(userPlatform);
+            await context.SaveChangesAsync();
+            NavManager.NavigateTo($"/users/{UserId}");
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error adding platform to user: {ex.Message}");
+        }
     }
 }

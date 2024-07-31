@@ -17,9 +17,9 @@
                     <i class="bi bi-plus-circle-fill" aria-hidden="true"></i> New User
                 </Button>
             </NavLink>
-            @if (AppUsers != null)
+            @if (users != null)
             {
-                <Datagrid Items="AppUsers">
+                <Datagrid Items="users">
                     <DatagridColumn Title="UserId" TRowData="User" Field="c => c.UserId" CanSort="true" CanFilter="true"
                         FilterImmediately="true" />
                     <DatagridColumn Title="Username" TRowData="User" Field="c => c.Username" CanSort="true" CanFilter="true"
@@ -27,12 +27,14 @@
                     <DatagridColumn Title="Email" TRowData="User" Field="c => c.Email" CanSort="true" CanFilter="true"
                         FilterImmediately="true" />
                     <DatagridColumn Title="Shows" TRowData="User">
-                        <a href="@($"/users/{@context?.UserId}/shows")" class="btn btn-primary"><i
-                                class="bi bi-camera-reels-fill" aria-hidden="true"></i> Shows</a>
+                        <a href="@($"/users/{@context?.UserId}/shows")" class="btn btn-primary">
+                            <i class="bi bi-camera-reels-fill" aria-hidden="true"></i> Shows
+                        </a>
                     </DatagridColumn>
                     <DatagridColumn Title="Details" TRowData="User">
-                        <a href="@($"/users/{@context?.UserId}")" class="btn btn-primary"><i class="bi bi-people-fill"
-                                aria-hidden="true"></i> Details</a>
+                        <a href="@($"/users/{@context?.UserId}")" class="btn btn-primary">
+                            <i class="bi bi-people-fill" aria-hidden="true"></i> Details
+                        </a>
                     </DatagridColumn>
                 </Datagrid>
             }
@@ -41,18 +43,23 @@
 </Tabs>
 
 @code {
-    private ICollection<User>? AppUsers { get; set; }
+    private ICollection<User>? users;
 
     protected override async Task OnInitializedAsync()
     {
-        await LoadDataAsync();
+        await LoadUsersAsync();
     }
 
-    private async Task LoadDataAsync()
+    private async Task LoadUsersAsync()
     {
-        using var context = DbFactory.CreateDbContext();
-
-        AppUsers = await context.Users!.ToListAsync();
-
+        try
+        {
+            using var context = await DbFactory.CreateDbContextAsync();
+            users = await context.Users!.ToListAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error loading users: {ex.Message}");
+        }
     }
 }
