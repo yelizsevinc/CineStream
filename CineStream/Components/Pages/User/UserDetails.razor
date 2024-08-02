@@ -3,6 +3,7 @@
 @using CineStream.Data
 
 @inject IDbContextFactory<CineStreamContext> DbFactory
+@inject NavigationManager NavManager
 
 <PageTitle>User</PageTitle>
 
@@ -87,7 +88,34 @@
                 </CardFooter>
             </Card>
         </div>
+        <div class="clr-col-12">
+            <Card>
+                <CardHeader>
+                    <i class="bi bi-info-circle-fill" aria-hidden="true"></i> Danger Zone
+                </CardHeader>
+                <CardBody>
+                    <CardBlock>
+                        <CardText>
+                            Do you want to delete user?
+                        </CardText>
+                    </CardBlock>
+                </CardBody>
+                <CardFooter>
+                    <Button Variant="Danger" OnClick="e => isModalVisible = true">
+                        <i class="bi bi-plus-circle-fill" aria-hidden="true"></i> Delete User
+                    </Button>
+                </CardFooter>
+            </Card>
+        </div>
     </div>
+
+    <Modal @bind-Open="isModalVisible" Size="ModalSize.Small">
+    <ModalTitle>Are you sure?</ModalTitle>
+    <ModalFooter>
+        <Button Variant="Danger" OnClick="DeleteUserAsync">Delete</Button>
+        <Button Variant="Outline" OnClick="e => isModalVisible = false">Cancel</Button>
+    </ModalFooter>
+</Modal>
 }
 
 @code
@@ -96,6 +124,7 @@
     private User? user { get; set; }
     private ICollection<Platform> userPlatforms = new List<Platform>();
     private ICollection<Show> userShows = new List<Show>();
+    private bool isModalVisible { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
@@ -142,5 +171,27 @@
             if (show != null) userShows.Add(show);
         }
 
+    }
+
+    private async Task DeleteUserAsync()
+    {
+        try
+        {
+            using var context = await DbFactory.CreateDbContextAsync();
+            // Delete all user shows of this user
+            var userShowsList = await context.UserShows!.Where(c => c.UserId == user.UserId).ToListAsync();
+            context.UserShows!.RemoveRange(userShowsList);
+            // Delete all user platforms of this user
+            var userPlatformsList = await context.PlatformUsers!.Where(c => c.UserId == user.UserId).ToListAsync();
+            context.PlatformUsers!.RemoveRange(userPlatformsList);
+            // Delete the user
+            context.Users!.Remove(user);
+            await context.SaveChangesAsync();
+            NavManager.NavigateTo("/users");
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error deleting user: {ex.Message}");
+        }
     }
 }
