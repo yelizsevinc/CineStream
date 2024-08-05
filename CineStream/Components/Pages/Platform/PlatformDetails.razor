@@ -3,6 +3,7 @@
 @using CineStream.Data
 
 @inject IDbContextFactory<CineStreamContext> DbFactory
+@inject NavigationManager NavManager
 
 <PageTitle>Platform</PageTitle>
 
@@ -90,7 +91,34 @@
                 </CardFooter>
             </Card>
         </div>
+        <div class="clr-col-12">
+            <Card>
+                <CardHeader>
+                    <i class="bi bi-info-circle-fill" aria-hidden="true"></i> Danger Zone
+                </CardHeader>
+                <CardBody>
+                    <CardBlock>
+                        <CardText>
+                            Do you want to delete platform?
+                        </CardText>
+                    </CardBlock>
+                </CardBody>
+                <CardFooter>
+                    <Button Variant="Danger" OnClick="e => isModalVisible = true">
+                        <i class="bi bi-plus-circle-fill" aria-hidden="true"></i> Delete Platform
+                    </Button>
+                </CardFooter>
+            </Card>
+        </div>
     </div>
+
+    <Modal @bind-Open="isModalVisible" Size="ModalSize.Small">
+    <ModalTitle>Are you sure?</ModalTitle>
+    <ModalFooter>
+        <Button Variant="Danger" OnClick="DeletePlatformAsync">Delete</Button>
+        <Button Variant="Outline" OnClick="e => isModalVisible = false">Cancel</Button>
+    </ModalFooter>
+</Modal>
 }
 
 @code
@@ -99,6 +127,7 @@
     private Platform? platform { get; set; }
     private ICollection<User> platformUsers = new List<User>();
     private ICollection<Show> platformShows = new List<Show>();
+    private bool isModalVisible { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
@@ -147,6 +176,28 @@
         {
             var show = await context.Shows!.FirstOrDefaultAsync(c => c.ShowId == platformShow.ShowId);
             if (show != null) platformShows.Add(show);
+        }
+    }
+
+    private async Task DeletePlatformAsync()
+    {
+        try
+        {
+            using var context = await DbFactory.CreateDbContextAsync();
+            // Delete all platform users of this platform
+            var platformUsersList = await context.PlatformUsers!.Where(c => c.PlatformId == platform.PlatformId).ToListAsync();
+            context.PlatformUsers!.RemoveRange(platformUsersList);
+            // Delete all platform shows of this platform
+            var platformShowsList = await context.PlatformShows!.Where(c => c.PlatformId == platform.PlatformId).ToListAsync();
+            context.PlatformShows!.RemoveRange(platformShowsList);
+            // Delete the platform
+            context.Platforms!.Remove(platform);
+            await context.SaveChangesAsync();
+            NavManager.NavigateTo("/platforms");
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error deleting platform: {ex.Message}");
         }
     }
 }
