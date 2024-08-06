@@ -77,7 +77,9 @@
                                 @foreach (var user in platformUsers)
                                 {
                                     <ul>
-                                        <li>@user.Username</li>
+                                        <li class=my-1>
+                                            <Button Icon="times" Variant="Danger" OnClick="@(e => RemoveUser(user.Username))"></Button> @user.Username
+                                        </li>
                                     </ul>
                                 }
                             }
@@ -215,5 +217,18 @@
         platformShows.Clear();
         await LoadPlatformShowsAsync(context);
 
+    }
+
+    private async Task RemoveUser(string username)
+    {
+        // Remove user from platform
+        using var context = await DbFactory.CreateDbContextAsync();
+        var user = await context.Users!.FirstOrDefaultAsync(c => c.Username == username);
+        var platformUser = await context.PlatformUsers!.FirstOrDefaultAsync(c => c.UserId == user.UserId && c.PlatformId == platform.PlatformId);
+        context.PlatformUsers!.Remove(platformUser);
+        await context.SaveChangesAsync();
+        // Reload platform users
+        platformUsers.Clear();
+        await LoadPlatformUsersAsync(context);
     }
 }
