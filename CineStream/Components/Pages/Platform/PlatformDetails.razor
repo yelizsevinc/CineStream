@@ -44,7 +44,9 @@
                                 @foreach (var show in platformShows)
                                 {
                                     <ul>
-                                        <li>@show.Title</li>
+                                        <li class=my-1>
+                                            <Button Icon="times" Variant="Danger" OnClick="@(e => RemoveShow(show.Title))"></Button> @show.Title
+                                        </li>
                                     </ul>
                                 }
                             }
@@ -199,5 +201,19 @@
         {
             Console.Error.WriteLine($"Error deleting platform: {ex.Message}");
         }
+    }
+
+    private async Task RemoveShow(string showTitle)
+    {
+        // Remove show from platform
+        using var context = await DbFactory.CreateDbContextAsync();
+        var show = await context.Shows!.FirstOrDefaultAsync(c => c.Title == showTitle);
+        var platformShow = await context.PlatformShows!.FirstOrDefaultAsync(c => c.ShowId == show.ShowId && c.PlatformId == platform.PlatformId);
+        context.PlatformShows!.Remove(platformShow);
+        await context.SaveChangesAsync();
+        // Reload platform shows
+        platformShows.Clear();
+        await LoadPlatformShowsAsync(context);
+
     }
 }
