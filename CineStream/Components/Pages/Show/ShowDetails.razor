@@ -177,11 +177,14 @@
     }
     private async Task DeleteShowAsync()
     {
+        if (show == null) return;
+
         try
         {
             using var context = await DbFactory.CreateDbContextAsync();
             // Delete all user shows of this show
             var showUsersList = await context.UserShows!.Where(c => c.ShowId == show.ShowId).ToListAsync();
+
             context.UserShows!.RemoveRange(showUsersList);
             // Delete all platform shows of this show
             var showPlatformsList = await context.PlatformShows!.Where(c => c.ShowId == show.ShowId).ToListAsync();
