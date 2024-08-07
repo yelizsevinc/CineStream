@@ -175,6 +175,8 @@
 
     private async Task DeleteUserAsync()
     {
+        if (user == null) return;
+
         try
         {
             using var context = await DbFactory.CreateDbContextAsync();
