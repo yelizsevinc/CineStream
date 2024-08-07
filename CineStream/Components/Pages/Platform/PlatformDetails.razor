@@ -41,14 +41,18 @@
                         <CardText>
                             @if (platformShows != null)
                             {
-                                @foreach (var show in platformShows)
-                                {
-                                    <ul>
-                                        <li class=my-1>
-                                            <Button Icon="times" Variant="Danger" OnClick="@(e => RemoveShow(show.Title))"></Button> @show.Title
-                                        </li>
-                                    </ul>
-                                }
+                                <ul>
+                                    @foreach (var show in platformShows)
+                                    {
+                                        @if (show.Title != null)
+                                        {
+                                            <li class=my-1>
+                                                <Button Icon="times" Variant="Danger" OnClick="@(e => RemoveShow(show.Title))"></Button>
+                                                @show.Title
+                                            </li>
+                                        }
+                                    }
+                                </ul>
                             }
                         </CardText>
                     </CardBlock>
@@ -74,14 +78,18 @@
                         <CardText>
                             @if (platformUsers != null)
                             {
-                                @foreach (var user in platformUsers)
-                                {
-                                    <ul>
-                                        <li class=my-1>
-                                            <Button Icon="times" Variant="Danger" OnClick="@(e => RemoveUser(user.Username))"></Button> @user.Username
-                                        </li>
-                                    </ul>
-                                }
+                                <ul>
+                                    @foreach (var user in platformUsers)
+                                    {
+                                        @if (user.Username != null)
+                                        {
+                                            <li class=my-1>
+                                                <Button Icon="times" Variant="Danger"
+                                                    OnClick="@(e => RemoveUser(user.Username))"></Button> @user.Username
+                                            </li>
+                                        }
+                                    }
+                                </ul>
                             }
                         </CardText>
                     </CardBlock>
@@ -185,6 +193,8 @@
 
     private async Task DeletePlatformAsync()
     {
+        if (platform == null) return;
+
         try
         {
             using var context = await DbFactory.CreateDbContextAsync();
@@ -210,7 +220,10 @@
         // Remove show from platform
         using var context = await DbFactory.CreateDbContextAsync();
         var show = await context.Shows!.FirstOrDefaultAsync(c => c.Title == showTitle);
-        var platformShow = await context.PlatformShows!.FirstOrDefaultAsync(c => c.ShowId == show.ShowId && c.PlatformId == platform.PlatformId);
+        if (show == null || platform == null) return;
+        var platformShow = await context.PlatformShows!.FirstOrDefaultAsync(c => c.ShowId == show.ShowId && c.PlatformId ==
+        platform.PlatformId);
+        if (platformShow == null) return;
         context.PlatformShows!.Remove(platformShow);
         await context.SaveChangesAsync();
         // Reload platform shows
@@ -224,7 +237,10 @@
         // Remove user from platform
         using var context = await DbFactory.CreateDbContextAsync();
         var user = await context.Users!.FirstOrDefaultAsync(c => c.Username == username);
-        var platformUser = await context.PlatformUsers!.FirstOrDefaultAsync(c => c.UserId == user.UserId && c.PlatformId == platform.PlatformId);
+        if (user == null || platform == null) return;
+        var platformUser = await context.PlatformUsers!.FirstOrDefaultAsync(c => c.UserId == user.UserId && c.PlatformId ==
+        platform.PlatformId);
+        if (platformUser == null) return;
         context.PlatformUsers!.Remove(platformUser);
         await context.SaveChangesAsync();
         // Reload platform users
