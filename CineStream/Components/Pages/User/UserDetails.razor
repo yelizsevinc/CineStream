@@ -41,9 +41,15 @@
                             @if (userShows != null)
                             {
                                 <ul>
-                                    @foreach (var userShow in userShows)
+                                    @foreach (var show in userShows)
                                     {
-                                        <li>@userShow?.Title</li>
+                                        @if (show.Title != null)
+                                        {
+                                            <li class=my-1>
+                                                <Button Icon="times" Variant="Danger" OnClick="@(e => RemoveShow(show.Title))"></Button>
+                                                @show.Title
+                                            </li>
+                                        }
                                     }
                                 </ul>
                             }
@@ -70,9 +76,16 @@
                             @if (userPlatforms != null)
                             {
                                 <ul>
-                                    @foreach (var userPlatform in userPlatforms)
+                                    @foreach (var platform in userPlatforms)
                                     {
-                                        <li>@userPlatform?.Name</li>
+                                        @if (platform.Name != null)
+                                        {
+                                            <li class=my-1>
+                                                <Button Icon="times" Variant="Danger"
+                                                    OnClick="@(e => RemovePlatform(platform.Name))"></Button>
+                                                @platform.Name
+                                            </li>
+                                        }
                                     }
                                 </ul>
                             }
@@ -195,5 +208,36 @@
         {
             Console.Error.WriteLine($"Error deleting user: {ex.Message}");
         }
+    }
+
+    private async Task RemovePlatform(string platformName)
+    {
+        // Remove platform from user
+        using var context = await DbFactory.CreateDbContextAsync();
+        var platform = await context.Platforms!.FirstOrDefaultAsync(c => c.Name == platformName);
+        if (platform == null || user == null) return;
+        var userPlatform = await context.PlatformUsers!.FirstOrDefaultAsync(c => c.PlatformId == platform.PlatformId && c.UserId
+        == user.UserId);
+        if (userPlatform == null) return;
+        context.PlatformUsers!.Remove(userPlatform);
+        await context.SaveChangesAsync();
+        // Reload user platforms
+        userPlatforms.Clear();
+        await LoadUserPlatformsAsync(context);
+    }
+
+    private async Task RemoveShow(string showTitle)
+    {
+        // Remove show from user
+        using var context = await DbFactory.CreateDbContextAsync();
+        var show = await context.Shows!.FirstOrDefaultAsync(c => c.Title == showTitle);
+        if (show == null || user == null) return;
+        var userShow = await context.UserShows!.FirstOrDefaultAsync(c => c.ShowId == show.ShowId && c.UserId == user.UserId);
+        if (userShow == null) return;
+        context.UserShows!.Remove(userShow);
+        await context.SaveChangesAsync();
+        // Reload user shows
+        userShows.Clear();
+        await LoadUserShowsAsync(context);
     }
 }
