@@ -13,7 +13,7 @@
         <Header>Users</Header>
         <ChildContent>
             <NavLink href="/users/new">
-                <Button Variant="Primary">
+                <Button Variant="Success" class="my-2">
                     <i class="bi bi-plus-circle-fill" aria-hidden="true"></i> New User
                 </Button>
             </NavLink>
@@ -27,12 +27,12 @@
                     <DatagridColumn Title="Email" TRowData="User" Field="c => c.Email" CanSort="true" CanFilter="true"
                         FilterImmediately="true" />
                     <DatagridColumn Title="Shows" TRowData="User">
-                        <a href="@($"/users/{@context?.UserId}/shows")" class="btn btn-primary">
+                        <a href="@($"/users/{@context?.UserId}/shows")" class="btn btn-success">
                             <i class="bi bi-camera-reels-fill" aria-hidden="true"></i> Shows
                         </a>
                     </DatagridColumn>
                     <DatagridColumn Title="Details" TRowData="User">
-                        <a href="@($"/users/{@context?.UserId}")" class="btn btn-primary">
+                        <a href="@($"/users/{@context?.UserId}")" class="btn btn-success">
                             <i class="bi bi-people-fill" aria-hidden="true"></i> Details
                         </a>
                     </DatagridColumn>

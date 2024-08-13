@@ -13,7 +13,7 @@
         <Header>Shows</Header>
         <ChildContent>
             <NavLink href="/shows/new">
-                <Button Variant="Primary">
+                <Button Variant="Success" class="my-2">
                     <i class="bi bi-plus-circle-fill" aria-hidden="true"></i> New Show
                 </Button>
             </NavLink>
@@ -29,7 +29,7 @@
                     <DatagridColumn Title="CreatedAt" TRowData="Show" Field="c => c.CreatedAt.ToString()" CanSort="true"
                         CanFilter="true" FilterImmediately="true" />
                     <DatagridColumn Title="Details" TRowData="Show">
-                        <a href="@($"/shows/{@context?.ShowId}")" class="btn btn-primary"><i class="bi bi-camera-reels-fill"
+                        <a href="@($"/shows/{@context?.ShowId}")" class="btn btn-success"><i class="bi bi-camera-reels-fill"
                                 aria-hidden="true"></i> Details</a>
                     </DatagridColumn>
                 </Datagrid>
