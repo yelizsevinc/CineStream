@@ -13,7 +13,7 @@
         <Header>Platforms</Header>
         <ChildContent>
             <NavLink href="/platforms/new">
-                <Button Variant="Primary">
+                <Button Variant="Success" class="my-2">
                     <i class="bi bi-plus-circle-fill" aria-hidden="true"></i> New Platform
                 </Button>
             </NavLink>
@@ -27,17 +27,17 @@
                     <DatagridColumn Title="CreatedAt" TRowData="Platform" Field="c => c.CreatedAt.ToString()" CanSort="true"
                         CanFilter="true" FilterImmediately="true" />
                     <DatagridColumn Title="Users" TRowData="Platform">
-                        <a href="@($"/platforms/{@context?.PlatformId}/users")" class="btn btn-primary">
+                        <a href="@($"/platforms/{@context?.PlatformId}/users")" class="btn btn-success">
                             <i class="bi bi-people-fill" aria-hidden="true"></i> Users
                         </a>
                     </DatagridColumn>
                     <DatagridColumn Title="Shows" TRowData="Platform">
-                        <a href="@($"/platforms/{@context?.PlatformId}/shows")" class="btn btn-primary">
+                        <a href="@($"/platforms/{@context?.PlatformId}/shows")" class="btn btn-success">
                             <i class="bi bi-camera-reels-fill" aria-hidden="true"></i> Shows
                         </a>
                     </DatagridColumn>
                     <DatagridColumn Title="Details" TRowData="Platform">
-                        <a href="@($"/platforms/{@context?.PlatformId}")" class="btn btn-primary">
+                        <a href="@($"/platforms/{@context?.PlatformId}")" class="btn btn-success">
                             <i class="bi bi-tv-fill" aria-hidden="true"></i> Details
                         </a>
                     </DatagridColumn>
