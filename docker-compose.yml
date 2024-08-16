@@ -1,5 +1,3 @@
-version: "3.8"
-
 services:
   mssql:
     image: mcr.microsoft.com/azure-sql-edge:latest
@@ -23,8 +21,20 @@ services:
     environment:
       SA_PASSWORD: "YourStrong!Passw0rd"
     volumes:
-      - ./init-db.sql:/opt/mssql/init/init-db.sql
-    command: /bin/bash -c 'sleep 30 && /opt/mssql-tools/bin/sqlcmd -S mssql -U sa -P $$SA_PASSWORD -i /opt/mssql/init/init-db.sql; wait;'
+      - ./CineStream.Db/init-db.sql:/opt/mssql/init/init-db.sql
+    command: /bin/bash -c 'sleep 30 && /opt/mssql-tools/bin/sqlcmd -S mssql -U sa -P $$SA_PASSWORD -i /opt/mssql/init/init-db.sql; sleep 10'
+
+  cinestream:
+    platform: linux/arm64
+    container_name: cinestream
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      - mssql
+      - sqlcmd
+    ports:
+      - "5050:5050"
 
 volumes:
   sqlserver_data:
