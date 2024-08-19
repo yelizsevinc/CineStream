@@ -35,10 +35,19 @@ CineStream app helps managing streaming platforms, media and users in the DB.
 - Docker
 - Entity Framework Core
 - Azure Data Studio
+- MSSQL
 - Bootstrap 5
 - Blazority
 
 ## Quick Start
+
+1. Clone the repository: `git clone git@github.com:yelizsevinc/CineStream.git`
+2. Navigate to the project directory: `cd CineStream`
+3. Get Docker up and running: `docker --version`
+4. Build and start the application using Docker Compose: `docker-compose up -d`
+5. Access the application at `http://localhost:5050`
+
+## Quick Start without Docker Compose
 
 1. Clone the repository: `git clone git@github.com:yelizsevinc/CineStream.git`
 2. Navigate to the project directory: `cd CineStream/CineStream`
