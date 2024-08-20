@@ -4,7 +4,21 @@ CineStream app helps managing streaming platforms, media and users in the DB eas
 
 With CineStream, you can easily organize your media content, manage user access and integrate with multiple streaming platforms—all from a single user-friendly interface.
 
-## Features
+<div align="center">
+
+![blazor][blazor-badge]
+![docker][docker-badge]
+![dotnet][dotnet-badge]
+![bootstrap][bootstrap-badge]
+![mssql][mssql-badge]
+
+---
+
+[Features](#-features) • [Getting Started](#-getting-started) • [Tech Stack](#-tech-stack)
+
+</div>
+
+## 🎯 Features
 
 ### Platform Management
 
@@ -27,7 +41,7 @@ With CineStream, you can easily organize your media content, manage user access 
 - Manage platforms associated with each user.
 - Manage shows associated with each user.
 
-## Getting Started
+## 🚀 Getting Started
 
 1. **Installation**: Clone the repository.
 
@@ -58,7 +72,7 @@ With CineStream, you can easily organize your media content, manage user access 
    dotnet watch
    ```
 
-## Tech Stack
+## 📚 Tech Stack
 
 - .NET 8.0
 - Blazor WebAssembly
@@ -68,3 +82,13 @@ With CineStream, you can easily organize your media content, manage user access 
 - MSSQL
 - Bootstrap 5
 - Blazority
+
+<!--
+Badge References
+-->
+
+[blazor-badge]: https://img.shields.io/badge/Blazor-512BD4?style=for-the-badge&logo=blazor&logoColor=white
+[docker-badge]: https://img.shields.io/badge/Docker-2CA5E0?style=for-the-badge&logo=docker&logoColor=white
+[dotnet-badge]: https://img.shields.io/badge/.NET-512BD4?style=for-the-badge&logo=dotnet&logoColor=white
+[bootstrap-badge]: https://img.shields.io/badge/Bootstrap-563D7C?style=for-the-badge&logo=bootstrap&logoColor=white
+[mssql-badge]: https://img.shields.io/badge/Mssql-003B57?style=for-the-badge&logo=sqlite&logoColor=white
